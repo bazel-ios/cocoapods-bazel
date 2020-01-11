@@ -143,7 +143,8 @@ module Pod
             .add(:private_headers, glob(attr: :private_headers).yield_self { |f| case f when Array then f.reject { |path| path.include? '.framework/' } else f end }, defaults: [[]])
             .add(:pch, glob(attr: :prefix_header, return_files: true).first, defaults: [nil])
             .add(:data, glob(attr: :resources), defaults: [[]])
-            .add(:resource_bundles, {}, defaults: [{}]).
+            .add(:resource_bundles, {}, defaults: [{}])
+            .add(:swift_version, uses_swift? && pod_target.swift_version, defaults: [nil, false]).
 
             kwargs
         end.kwargs
