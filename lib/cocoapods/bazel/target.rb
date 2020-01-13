@@ -83,7 +83,7 @@ module Pod
             raise "Unhandled: #{non_library_spec.spec_type}"
           end
 
-        targets.map { |target| self.class.new(installer, target) }
+        targets.uniq.map { |target| self.class.new(installer, target) }
       end
 
       def product_module_name
