@@ -2,9 +2,9 @@
 
 # Cocoapods::Bazel
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/cocoapods/bazel`. To experiment with that code, run `bin/console` for an interactive prompt.
+Cocoapods::Bazel is a Cocoapods plugin that makes it easy to use [Bazel](https://bazel.build) instead of Xcode to build your iOS project. It automatically generates Bazel's `BUILD.bazel` files. It uses [`rules_ios`](https://github.com/ob/rules_ios) so you need to set up the `WORKSPACE` file following the instructions in the [`README`](https://github.com/ob/rules_ios/blob/master/README.md).
 
-TODO: Delete this and the text above, and describe your gem
+> :warning: **This is alpha software.** We are developing this plugin in the open so you should only use it if you know what you are doing and are willing to help develop it.
 
 ## Installation
 
@@ -24,7 +24,13 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+This plugin will run extra steps after post_install to generate BUILD.bazel files for Bazel.
+
+To enable the plugin, simply add the following section to your `Podfile`
+
+```
+plugin 'cocoapods-bazel', {}
+```
 
 ## Development
 
@@ -34,7 +40,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/cocoapods-bazel.
+Bug reports and pull requests are welcome on GitHub at https://github.com/ob/cocoapods-bazel.
 
 ## License
 

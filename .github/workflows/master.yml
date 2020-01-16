@@ -1,0 +1,22 @@
+name: master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  integration_tests:
+    name: Build and Test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Select Xcode 11.2
+        run: sudo xcode-select -s /Applications/Xcode_11.2.app
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: "2.x" # Version range or exact version of a Ruby version to use, using semvers version range syntax.
+      - name: Install Bazel
+        run: brew install bazel buildifier
+      - name: Build and Test
+        run: echo Testing goes here
