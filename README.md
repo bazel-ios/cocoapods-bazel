@@ -24,7 +24,12 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+This plugin will run extra steps after post_install to generate BUILD.bazel files for Bazel.
+
+To enable the plugin, simply add the following section in the Podfile
+```
+plugin 'cocoapods-bazel', {}
+```
 
 ## Development
 
