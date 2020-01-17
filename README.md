@@ -29,7 +29,13 @@ This plugin will run extra steps after post_install to generate BUILD.bazel file
 To enable the plugin, simply add the following section to your `Podfile`
 
 ```
-plugin 'cocoapods-bazel', {}
+plugin 'cocoapods-bazel', {
+  rules: {
+    'apple_framework' => { load: '@build_bazel_rules_ios//rules:framework.bzl', rule: 'apple_framework' }.freeze,
+    'ios_application' => { load: '@build_bazel_rules_ios//rules:app.bzl', rule: 'ios_application' }.freeze,
+    'ios_unit_test' => { load: '@build_bazel_rules_ios//rules:test.bzl', rule: 'ios_unit_test' }.freeze
+  }.freeze,
+}
 ```
 
 ## Development

@@ -7,27 +7,15 @@ module Pod
       private_constant :PLUGIN_KEY
       DEFAULTS = {
         rules: {
-          'apple_framework' => { load: '@rules_ios//:framework.bzl', rule: 'apple_framework' }.freeze,
-          'ios_application' => { load: '@rules_ios//:app.bzl', rule: 'ios_application' }.freeze,
-          'ios_unit_test' => { load: '@rules_ios//:test.bzl', rule: 'ios_unit_test' }.freeze
+          'apple_framework' => { load: '@build_bazel_rules_ios//rules:framework.bzl', rule: 'apple_framework' }.freeze,
+          'ios_application' => { load: '@build_bazel_rules_ios//rules:app.bzl', rule: 'ios_application' }.freeze,
+          'ios_unit_test' => { load: '@build_bazel_rules_ios//rules:test.bzl', rule: 'ios_unit_test' }.freeze
         }.freeze,
         overrides: {}.freeze
       }.with_indifferent_access.freeze
       private_constant :DEFAULTS
 
       attr_reader :to_h
-
-      # plugin('cocoapods-bazelizer',
-      #        rules: {
-      #          'apple_framework' => { load: '@rules_square//:framework.bzl', rule: 'sq_apple_framework' },
-      #          'ios_application' => { load: '@rules_square//:app.bzl', rule: 'sq_ios_application' },
-      #          'ios_unit_test'   => { load: '@rules_square//:test.bzl', rule: 'sq_ios_unit_test' },
-      #        },
-      #       overrides: {
-      #         'Protobuf' => {
-      #           'defines' => ['GPB_...=1']
-      #         }
-      #       })
 
       def self.enabled_in_podfile?(podfile)
         podfile.plugins.key?(PLUGIN_KEY)
