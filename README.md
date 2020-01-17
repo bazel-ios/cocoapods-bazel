@@ -1,6 +1,6 @@
+# Cocoapods::Bazel
 ![](https://github.com/ob/cocoapods-bazel/workflows/master/badge.svg)
 
-# Cocoapods::Bazel
 
 Cocoapods::Bazel is a Cocoapods plugin that makes it easy to use [Bazel](https://bazel.build) instead of Xcode to build your iOS project. It automatically generates Bazel's `BUILD.bazel` files. It uses [`rules_ios`](https://github.com/ob/rules_ios) so you need to set up the `WORKSPACE` file following the instructions in the [`README`](https://github.com/ob/rules_ios/blob/master/README.md).
 
