@@ -137,6 +137,7 @@ module Pod
             add(:module_name, product_module_name, defaults: [label]).
             # bar
             add(:module_map, file_accessors.map(&:module_map).find(&:itself)&.relative_path_from(@package_dir)&.to_s, defaults: [nil]).
+            .add(:module_map, !non_library_spec && file_accessors.map(&:module_map).find(&:itself)&.relative_path_from(@package_dir)&.to_s, defaults: [nil, false]).
 
             # public headers
             add(:public_headers, glob(attr: :public_headers, sorted: false).yield_self { |f| case f when Array then f.reject { |path| path.include? '.framework/' } else f end }, defaults: [[]])
