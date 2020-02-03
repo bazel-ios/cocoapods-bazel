@@ -40,8 +40,6 @@ module Pod
         package_basename = File.basename(package)
         if package_basename == label
           "//#{package}"
-        # elsif label.start_with(package_basename)
-        #   "//#{package}:#{label.sub(/#{Regexp.escape package_basename}[-_]/)}"
         else
           "//#{package}:#{label}"
         end
@@ -132,11 +130,8 @@ module Pod
       def to_rule_kwargs
         kwargs = RuleArgs.new do |args|
           args
-            .add(:name, label).
-            # foo
-            add(:module_name, product_module_name, defaults: [label]).
-            # bar
-            add(:module_map, file_accessors.map(&:module_map).find(&:itself)&.relative_path_from(@package_dir)&.to_s, defaults: [nil]).
+            .add(:name, label)
+            .add(:module_name, product_module_name, defaults: [label])
             .add(:module_map, !non_library_spec && file_accessors.map(&:module_map).find(&:itself)&.relative_path_from(@package_dir)&.to_s, defaults: [nil, false]).
 
             # public headers
