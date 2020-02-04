@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     cocoapods-bazel (0.1.0)
-      starlark_compiler
+      starlark_compiler (~> 0.2)
 
 GEM
   remote: https://rubygems.org/
@@ -98,7 +98,7 @@ GEM
       unicode-display_width (>= 1.4.0, < 1.7)
     ruby-macho (1.4.0)
     ruby-progressbar (1.10.1)
-    starlark_compiler (0.1.0)
+    starlark_compiler (0.2.0)
     thread_safe (0.3.6)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
