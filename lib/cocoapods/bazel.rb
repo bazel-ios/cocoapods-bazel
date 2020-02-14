@@ -27,13 +27,30 @@ module Pod
           end
         end
         build_files.each_value(&:save!)
-
-        if build_files.any? && Pod::Executable.which('buildifier')
-          Pod::Executable.execute_command 'buildifier',
-                                          %w[-type build] + build_files.each_key.map { |d| File.join workspace, d, 'BUILD.bazel' },
-                                          true
-        end
+        format_files(build_files: build_files, buildifier: config.buildifier, workspace: workspace)
       end
+    end
+
+    def self.format_files(build_files:, buildifier:, workspace:)
+      return if build_files.empty?
+
+      args = []
+      case buildifier
+      when true
+        return unless Pod::Executable.which('buildifier')
+
+        args = ['buildifier']
+      when String, Array
+        args = Array(buildifier)
+      else
+        return
+      end
+      args += %w[-type build]
+
+      executable, *args = args
+      Pod::Executable.execute_command executable,
+                                      args + build_files.each_key.map { |d| File.join workspace, d, 'BUILD.bazel' },
+                                      true
     end
   end
 end

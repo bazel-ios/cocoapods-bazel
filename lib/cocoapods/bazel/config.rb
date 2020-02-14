@@ -11,7 +11,8 @@ module Pod
           'ios_application' => { load: '@build_bazel_rules_ios//rules:app.bzl', rule: 'ios_application' }.freeze,
           'ios_unit_test' => { load: '@build_bazel_rules_ios//rules:test.bzl', rule: 'ios_unit_test' }.freeze
         }.freeze,
-        overrides: {}.freeze
+        overrides: {}.freeze,
+        buildifier: true
       }.with_indifferent_access.freeze
       private_constant :DEFAULTS
 
@@ -29,12 +30,21 @@ module Pod
 
       def self.from_podfile_options(options)
         new(DEFAULTS.merge(options) do |_key, old_val, new_val|
-          old_val.merge(new_val) # intentionally only 1 level deep of merging
+          case old_val
+          when Hash
+            old_val.merge(new_val) # intentionally only 1 level deep of merging
+          else
+            new_val
+          end
         end)
       end
 
       def initialize(to_h)
         @to_h = to_h
+      end
+
+      def buildifier
+        to_h[:buildifier]
       end
 
       def load_for(macro:)
