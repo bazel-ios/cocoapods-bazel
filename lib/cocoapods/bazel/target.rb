@@ -36,9 +36,11 @@ module Pod
         @package = installer.sandbox.pod_dir(pod_target.pod_name).relative_path_from(installer.config.installation_root).to_s
       end
 
-      def bazel_label
+      def bazel_label(relative_to: nil)
         package_basename = File.basename(package)
-        if package_basename == label
+        if package == relative_to
+          ":#{label}"
+        elsif package_basename == label
           "//#{package}"
         else
           "//#{package}:#{label}"
@@ -221,7 +223,9 @@ module Pod
         kwargs[:vendored_dynamic_libraries] = glob(attr: :vendored_dynamic_libraries, return_files: true)
 
         # any compatible provider: CCProvider, SwiftInfo, etc
-        kwargs[:deps] = dependent_targets.map(&:bazel_label).sort
+        kwargs[:deps] = dependent_targets
+                        .map { |dt| dt.bazel_label(relative_to: package) }
+                        .sort_by { |l| [l.start_with?(':') ? -2 : -1, l] }
 
         case non_library_spec&.spec_type
         when :test
@@ -351,7 +355,7 @@ module Pod
           env: pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {}),
           infoplists: [resolved_build_setting_value('INFOPLIST_FILE')].compact,
           minimum_os_version: pod_target.platform.deployment_target.to_s,
-          test_host: test_host&.bazel_label || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
+          test_host: test_host&.bazel_label(relative_to: package) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
         }
       end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'cocoapods/bazel/build_file'
+require 'starlark_compiler/build_file'
 require 'cocoapods/bazel/config'
 require 'cocoapods/bazel/target'
 
@@ -12,7 +12,7 @@ module Pod
       UI.titled_section 'Generating Bazel files' do
         workspace = installer.config.installation_root
         sandbox = installer.sandbox
-        build_files = Hash.new { |h, k| h[k] = BuildFile.new(workspace: workspace, package: k) }
+        build_files = Hash.new { |h, k| h[k] = StarlarkCompiler::BuildFile.new(workspace: workspace, package: k) }
         installer.pod_targets.each do |pod_target|
           package = sandbox.pod_dir(pod_target.pod_name).relative_path_from(workspace).to_s
           build_file = build_files[package]
