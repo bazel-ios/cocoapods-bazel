@@ -354,7 +354,7 @@ module Pod
           bundle_id: resolved_build_setting_value('PRODUCT_BUNDLE_IDENTIFIER'),
           env: pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {}),
           infoplists: [resolved_build_setting_value('INFOPLIST_FILE')].compact,
-          minimum_os_version: pod_target.platform.deployment_target.to_s,
+          minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
           test_host: test_host&.bazel_label(relative_to: package) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
         }
       end
@@ -374,7 +374,7 @@ module Pod
           launch_images: [],
           launch_storyboard: nil,
           linkopts: [],
-          minimum_os_version: pod_target.platform.deployment_target.to_s,
+          minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
           provisioning_profile: nil,
           resources: [],
           settings_bundle: [],
