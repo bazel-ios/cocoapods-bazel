@@ -3,6 +3,7 @@
 require 'bundler/setup'
 
 require 'cocoapods'
+require 'cocoapods/bazel'
 
 #-----------------------------------------------------------------------------#
 

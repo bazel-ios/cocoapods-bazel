@@ -30,11 +30,11 @@ module Pod
           (config.keys - xcconfig.keys).empty?
         end
 
-        xcconfig.delete_if do |k, _|
-          %w[OTHER_CFLAGS OTHER_SWIFT_FLAGS SWIFT_VERSION SDKROOT CONFIGURATION PODS_TARGET_SRCROOT SRCROOT].include?(k)
-        end
         xcconfig.each_key { |k| xcconfig[k] = resolved_build_setting_value(k, settings: xcconfig) }
-        xcconfig.delete_if { |_, v| v.empty? }
+        xcconfig.delete_if do |k, v|
+          %w[OTHER_CFLAGS OTHER_SWIFT_FLAGS SWIFT_VERSION SDKROOT CONFIGURATION PODS_TARGET_SRCROOT SRCROOT].include?(k) ||
+            v.empty?
+        end
 
         unless matching_defaults.empty?
           transformed = matching_defaults.map do |name, default_config|
