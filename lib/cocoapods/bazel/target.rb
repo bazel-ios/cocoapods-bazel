@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'xcconfig_resolver'
+
 module Pod
   module Bazel
     class Target
@@ -25,6 +27,7 @@ module Pod
 
       attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package
       private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package
+      include XCConfigResolver
 
       def initialize(installer, pod_target, non_library_spec = nil)
         @installer = installer
@@ -101,32 +104,21 @@ module Pod
         file_accessors.any? { |fa| fa.source_files.any? { |s| s.extname == '.swift' } }
       end
 
-      def pod_target_xcconfig
+      # TODO: handle both configs
+      def pod_target_xcconfig(configuration: :debug)
         pod_target
-          .build_settings_for_spec(non_library_spec || pod_target.root_spec, configuration: :debug)
+          .build_settings_for_spec(non_library_spec || pod_target.root_spec, configuration: configuration)
           .merged_pod_target_xcconfigs
-          .merge('CONFIGURATION' => 'Debug')
+          .to_h
+          .merge(
+            'CONFIGURATION' => configuration.to_s.capitalize,
+            'PODS_TARGET_SRCROOT' => ':',
+            'SRCROOT' => ':'
+          )
       end
 
-      def resolved_build_setting_value(setting)
-        # TODO: handle both configs
-        settings = pod_target_xcconfig
-                   .merge(
-                     'SRCROOT' => ':',
-                     'PODS_TARGET_SRCROOT' => ':'
-                   )
-
-        return unless (value = settings[setting])
-
-        resolve_string_with_build_settings(value, settings: settings).sub(%r{\A:/}, '')
-      end
-
-      def resolve_string_with_build_settings(string, settings: pod_target_xcconfig)
-        return string unless string =~ /\$(?:\{([_a-zA-Z0-0]+?)\}|\(([_a-zA-Z0-0]+?)\))/
-
-        match, key = Regexp.last_match.values_at(0, 1, 2).compact
-        sub = settings.fetch(key, '')
-        resolve_string_with_build_settings(string.gsub(match, sub), settings: settings)
+      def resolved_build_setting_value(setting, settings: pod_target_xcconfig)
+        super(setting, settings: settings)
       end
 
       def to_rule_kwargs
