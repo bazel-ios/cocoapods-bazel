@@ -194,9 +194,10 @@ module Pod
         end
 
         # non-propagated stuff
-        kwargs[:swift_copts] = resolved_build_setting_value('OTHER_SWIFT_FLAGS')&.shellsplit || []
-        kwargs[:objc_copts] = resolved_build_setting_value('OTHER_CFLAGS')&.shellsplit || []
-        # kwargs[:cc_copts] = resolve_string_with_build_settings('${OTHER_CFLAGS} ${OTHER_CPPFLAGS}')&.shellsplit || []
+        kwargs[:swift_copts] = resolved_build_setting_value('OTHER_SWIFT_FLAGS') || []
+        kwargs[:objc_copts] = resolved_build_setting_value('OTHER_CFLAGS') || []
+        kwargs[:linkopts] = resolved_build_setting_value('OTHER_LDFLAGS') || []
+        # kwargs[:cc_copts] = resolved_build_setting_value('${OTHER_CFLAGS} ${OTHER_CPPFLAGS}') || []
 
         # propagated
         kwargs[:defines] = []
