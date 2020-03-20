@@ -25,11 +25,12 @@ module Pod
         end
       end
 
-      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package
-      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package
       include XCConfigResolver
 
-      def initialize(installer, pod_target, non_library_spec = nil)
+      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
+      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
+
+      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {})
         @installer = installer
         @pod_target = pod_target
         @file_accessors = non_library_spec ? pod_target.file_accessors.select { |fa| fa.spec == non_library_spec } : pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
@@ -37,6 +38,7 @@ module Pod
         @label = (non_library_spec ? pod_target.non_library_spec_label(non_library_spec) : pod_target.label)
         @package_dir = installer.sandbox.pod_dir(pod_target.pod_name)
         @package = installer.sandbox.pod_dir(pod_target.pod_name).relative_path_from(installer.config.installation_root).to_s
+        @default_xcconfigs = default_xcconfigs
       end
 
       def bazel_label(relative_to: nil)
@@ -134,9 +136,14 @@ module Pod
             .add(:pch, glob(attr: :prefix_header, return_files: true).first, defaults: [nil])
             .add(:data, glob(attr: :resources, exclude_directories: 0), defaults: [[]])
             .add(:resource_bundles, {}, defaults: [{}])
-            .add(:swift_version, uses_swift? && pod_target.swift_version, defaults: [nil, false]).
+            .add(:swift_version, uses_swift? && pod_target.swift_version, defaults: [nil, false])
 
-            kwargs
+          # xcconfigs
+          resolve_xcconfig(pod_target_xcconfig, default_xcconfigs: default_xcconfigs).tap do |name, xcconfig|
+            args
+              .add(:default_xcconfig_name, name, defaults: [nil])
+              .add(:xcconfig, xcconfig, defaults: [{}])
+          end
         end.kwargs
 
         file_accessors.group_by { |fa| fa.spec_consumer.requires_arc.class }.tap do |fa_by_arc|
