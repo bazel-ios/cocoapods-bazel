@@ -12,7 +12,8 @@ module Pod
           'ios_unit_test' => { load: '@build_bazel_rules_ios//rules:test.bzl', rule: 'ios_unit_test' }.freeze
         }.freeze,
         overrides: {}.freeze,
-        buildifier: true
+        buildifier: true,
+        default_xcconfigs: {}.freeze
       }.with_indifferent_access.freeze
       private_constant :DEFAULTS
 
@@ -49,6 +50,10 @@ module Pod
 
       def load_for(macro:)
         to_h.dig('rules', macro) || raise("no rule configured for #{macro}")
+      end
+
+      def default_xcconfigs
+        to_h[:default_xcconfigs]
       end
     end
   end

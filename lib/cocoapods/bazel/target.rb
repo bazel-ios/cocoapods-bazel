@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'xcconfig_resolver'
+
 module Pod
   module Bazel
     class Target
@@ -23,10 +25,12 @@ module Pod
         end
       end
 
-      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package
-      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package
+      include XCConfigResolver
 
-      def initialize(installer, pod_target, non_library_spec = nil)
+      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
+      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
+
+      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {})
         @installer = installer
         @pod_target = pod_target
         @file_accessors = non_library_spec ? pod_target.file_accessors.select { |fa| fa.spec == non_library_spec } : pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
@@ -34,6 +38,7 @@ module Pod
         @label = (non_library_spec ? pod_target.non_library_spec_label(non_library_spec) : pod_target.label)
         @package_dir = installer.sandbox.pod_dir(pod_target.pod_name)
         @package = installer.sandbox.pod_dir(pod_target.pod_name).relative_path_from(installer.config.installation_root).to_s
+        @default_xcconfigs = default_xcconfigs
       end
 
       def bazel_label(relative_to: nil)
@@ -101,32 +106,21 @@ module Pod
         file_accessors.any? { |fa| fa.source_files.any? { |s| s.extname == '.swift' } }
       end
 
-      def pod_target_xcconfig
+      # TODO: handle both configs
+      def pod_target_xcconfig(configuration: :debug)
         pod_target
-          .build_settings_for_spec(non_library_spec || pod_target.root_spec, configuration: :debug)
+          .build_settings_for_spec(non_library_spec || pod_target.root_spec, configuration: configuration)
           .merged_pod_target_xcconfigs
-          .merge('CONFIGURATION' => 'Debug')
+          .to_h
+          .merge(
+            'CONFIGURATION' => configuration.to_s.capitalize,
+            'PODS_TARGET_SRCROOT' => ':',
+            'SRCROOT' => ':'
+          )
       end
 
-      def resolved_build_setting_value(setting)
-        # TODO: handle both configs
-        settings = pod_target_xcconfig
-                   .merge(
-                     'SRCROOT' => ':',
-                     'PODS_TARGET_SRCROOT' => ':'
-                   )
-
-        return unless (value = settings[setting])
-
-        resolve_string_with_build_settings(value, settings: settings).sub(%r{\A:/}, '')
-      end
-
-      def resolve_string_with_build_settings(string, settings: pod_target_xcconfig)
-        return string unless string =~ /\$(?:\{([_a-zA-Z0-0]+?)\}|\(([_a-zA-Z0-0]+?)\))/
-
-        match, key = Regexp.last_match.values_at(0, 1, 2).compact
-        sub = settings.fetch(key, '')
-        resolve_string_with_build_settings(string.gsub(match, sub), settings: settings)
+      def resolved_build_setting_value(setting, settings: pod_target_xcconfig)
+        super(setting, settings: settings)
       end
 
       def to_rule_kwargs
@@ -142,9 +136,14 @@ module Pod
             .add(:pch, glob(attr: :prefix_header, return_files: true).first, defaults: [nil])
             .add(:data, glob(attr: :resources, exclude_directories: 0), defaults: [[]])
             .add(:resource_bundles, {}, defaults: [{}])
-            .add(:swift_version, uses_swift? && pod_target.swift_version, defaults: [nil, false]).
+            .add(:swift_version, uses_swift? && pod_target.swift_version, defaults: [nil, false])
 
-            kwargs
+          # xcconfigs
+          resolve_xcconfig(pod_target_xcconfig, default_xcconfigs: default_xcconfigs).tap do |name, xcconfig|
+            args
+              .add(:default_xcconfig_name, name, defaults: [nil])
+              .add(:xcconfig, xcconfig, defaults: [{}])
+          end
         end.kwargs
 
         file_accessors.group_by { |fa| fa.spec_consumer.requires_arc.class }.tap do |fa_by_arc|
@@ -202,9 +201,10 @@ module Pod
         end
 
         # non-propagated stuff
-        kwargs[:swift_copts] = resolved_build_setting_value('OTHER_SWIFT_FLAGS')&.shellsplit || []
-        kwargs[:objc_copts] = resolved_build_setting_value('OTHER_CFLAGS')&.shellsplit || []
-        # kwargs[:cc_copts] = resolve_string_with_build_settings('${OTHER_CFLAGS} ${OTHER_CPPFLAGS}')&.shellsplit || []
+        kwargs[:swift_copts] = resolved_build_setting_value('OTHER_SWIFT_FLAGS') || []
+        kwargs[:objc_copts] = resolved_build_setting_value('OTHER_CFLAGS') || []
+        kwargs[:linkopts] = resolved_build_setting_value('OTHER_LDFLAGS') || []
+        # kwargs[:cc_copts] = resolved_build_setting_value('${OTHER_CFLAGS} ${OTHER_CPPFLAGS}') || []
 
         # propagated
         kwargs[:defines] = []
