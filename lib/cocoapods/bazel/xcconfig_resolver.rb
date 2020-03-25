@@ -25,6 +25,17 @@ module Pod
         resolve_string_with_build_settings(string.gsub(match, sub), settings: settings)
       end
 
+      UNRESOLVED_SETTINGS = [
+        'CONFIGURATION', # not needed, only used to help resolve other settings that may use it in substitutions
+        'OTHER_CFLAGS', # serialized separately as objc_copts
+        'OTHER_SWIFT_FLAGS', # serialized separately as swift_copts
+        'PODS_TARGET_SRCROOT', # not needed, used to help resolve file references relative to the current package
+        'SDKROOT', # not needed since the SDKROOT gets propagated via the apple configuration transition
+        'SRCROOT', # not needed, used to help resolve file references relative to the current workspace
+        'SWIFT_VERSION' # serialized separately as swift_version
+      ].freeze
+      private_constant :UNRESOLVED_SETTINGS
+
       def resolve_xcconfig(xcconfig, default_xcconfigs: [])
         matching_defaults = default_xcconfigs.select do |_, config|
           (config.keys - xcconfig.keys).empty?
@@ -32,8 +43,7 @@ module Pod
 
         xcconfig.each_key { |k| xcconfig[k] = resolved_build_setting_value(k, settings: xcconfig) }
         xcconfig.delete_if do |k, v|
-          %w[OTHER_CFLAGS OTHER_SWIFT_FLAGS SWIFT_VERSION SDKROOT CONFIGURATION PODS_TARGET_SRCROOT SRCROOT].include?(k) ||
-            v.empty?
+          UNRESOLVED_SETTINGS.include?(k) || v.empty?
         end
 
         unless matching_defaults.empty?
