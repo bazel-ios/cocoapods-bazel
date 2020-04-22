@@ -369,7 +369,10 @@ module Pod
           extensions: [],
           families: %w[iphone ipad],
           frameworks: [],
-          infoplists: [resolved_build_setting_value('INFOPLIST_FILE')].compact,
+          infoplists: [
+            resolved_build_setting_value('INFOPLIST_FILE'),
+            nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)
+          ].compact,
           ipa_post_processor: nil,
           launch_images: [],
           launch_storyboard: nil,
@@ -384,7 +387,7 @@ module Pod
         }
       end
 
-      def arr_or_nil(arr)
+      def nil_if_empty(arr)
         arr.empty? ? nil : arr
       end
 

@@ -23,7 +23,7 @@ RSpec.describe Pod::Bazel::XCConfigResolver do
       'ENABLE_TESTABILITY_Debug' => 'YES',
       'ENABLE_TESTABILITY_Release' => 'NO',
 
-      'GCC_PREPROCESSOR_DEFINITIONS' => ['foo', 'bar=1', 'baz=YES'],
+      'GCC_PREPROCESSOR_DEFINITIONS' => ['foo', 'bar=1', 'baz=YES']
     )
   end
 end
