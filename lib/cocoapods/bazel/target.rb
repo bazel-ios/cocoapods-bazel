@@ -328,6 +328,7 @@ module Pod
           end.uniq
         elsif extensions && File.extname(glob).empty?
           extensions.map do |ext|
+            glob.chomp!('**/*') # If we reach here and the glob ends with **/*, we need to avoid duplicating it (we do not want to end up with **/*/**/*)
             File.join(glob, '**', "*.#{ext}")
           end
         elsif expand_directories
