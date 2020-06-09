@@ -270,6 +270,7 @@ module Pod
           infoplists: [],
           minimum_os_version: nil,
           test_host: nil,
+          platforms: {},
 
           app_icons: [],
           bundle_name: nil,
@@ -346,7 +347,8 @@ module Pod
 
       def framework_kwargs
         {
-          visibility: ['//visibility:public']
+          visibility: ['//visibility:public'],
+          platforms: { pod_target.platform.string_name.downcase => pod_target.platform.deployment_target.to_s }
         }
       end
 
