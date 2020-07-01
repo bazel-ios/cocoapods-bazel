@@ -365,7 +365,7 @@ module Pod
       def app_kwargs
         {
           app_icons: [],
-          bundle_id: resolved_build_setting_value('PRODUCT_BUNDLE_IDENTIFIER'),
+          bundle_id: resolved_build_setting_value('PRODUCT_BUNDLE_IDENTIFIER') || "org.cocoapods.#{label}",
           bundle_name: nil,
           entitlements: resolved_build_setting_value('CODE_SIGN_ENTITLEMENTS'),
           entitlements_validation: nil,
