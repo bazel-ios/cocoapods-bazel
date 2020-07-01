@@ -1,0 +1,2 @@
+spec/integration/*/after   linguist-vendored=true
+spec/integration           linguist-generated=true
