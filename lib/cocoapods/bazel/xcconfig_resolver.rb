@@ -27,12 +27,14 @@ module Pod
 
       UNRESOLVED_SETTINGS = [
         'CONFIGURATION', # not needed, only used to help resolve other settings that may use it in substitutions
+        'HEADER_SEARCH_PATHS', # serialized into copts, handled natively by Xcode instead of via xcspecs
         'OTHER_CFLAGS', # serialized separately as objc_copts
         'OTHER_SWIFT_FLAGS', # serialized separately as swift_copts
         'PODS_TARGET_SRCROOT', # not needed, used to help resolve file references relative to the current package
         'SDKROOT', # not needed since the SDKROOT gets propagated via the apple configuration transition
         'SRCROOT', # not needed, used to help resolve file references relative to the current workspace
-        'SWIFT_VERSION' # serialized separately as swift_version
+        'SWIFT_VERSION', # serialized separately as swift_version
+        'USER_HEADER_SEARCH_PATHS' # serialized into copts, handled natively by Xcode instead of via xcspecs
       ].freeze
       private_constant :UNRESOLVED_SETTINGS
 

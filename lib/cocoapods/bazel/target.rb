@@ -123,6 +123,14 @@ module Pod
         super(setting, settings: settings)
       end
 
+      def pod_target_xcconfig_header_search_paths
+        resolved_build_setting_value('HEADER_SEARCH_PATHS', settings: pod_target_xcconfig.merge('PODS_TARGET_SRCROOT' => @package)) || []
+      end
+
+      def pod_target_xcconfig_user_header_search_paths
+        resolved_build_setting_value('USER_HEADER_SEARCH_PATHS', settings: pod_target_xcconfig.merge('PODS_TARGET_SRCROOT' => @package)) || []
+      end
+
       def to_rule_kwargs
         kwargs = RuleArgs.new do |args|
           args
@@ -205,6 +213,18 @@ module Pod
         kwargs[:objc_copts] = resolved_build_setting_value('OTHER_CFLAGS') || []
         kwargs[:linkopts] = resolved_build_setting_value('OTHER_LDFLAGS') || []
         # kwargs[:cc_copts] = resolved_build_setting_value('${OTHER_CFLAGS} ${OTHER_CPPFLAGS}') || []
+
+        pod_target_xcconfig_header_search_paths.each do |path|
+          iquote = "-I#{path}"
+          kwargs[:objc_copts] << iquote
+          kwargs[:swift_copts] << '-Xcc' << iquote
+        end
+
+        pod_target_xcconfig_user_header_search_paths.each do |path|
+          i = "-iquote#{path}"
+          kwargs[:objc_copts] << i
+          kwargs[:swift_copts] << '-Xcc' << i
+        end
 
         # propagated
         kwargs[:defines] = []
