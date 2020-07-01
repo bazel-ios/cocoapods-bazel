@@ -23,4 +23,4 @@ ARGV.replace %w[install]
 
 load Gem.bin_path('cocoapods', 'pod')
 
-exec 'bazelisk', '--ignore_all_rc_files', 'build', '...'
+exec 'bazelisk', '--ignore_all_rc_files', 'build', '--verbose_failures', '...'
