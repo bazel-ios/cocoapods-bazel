@@ -19,7 +19,7 @@ target 'App' do
   all_podspecs.each do |podspec|
     spec = Pod::Specification.from_file(File.join(__dir__, podspec))
     subspecs = spec.recursive_subspecs.group_by(&:spec_type)
-    pod spec.name, path: podspec, testspecs: subspecs[:test].map(&:base_name), appspecs: subspecs[:app].map(&:base_name)
+    pod spec.name, path: podspec, testspecs: Array(subspecs[:test]).map(&:base_name), appspecs: Array(subspecs[:app]).map(&:base_name)
   end
 
   target 'AppTests' do
