@@ -4,6 +4,7 @@ def cocoapods_bazel_specs_cp_repos_dir
   Pathname(__dir__).parent.join('integration', 'specs-repos')
 end
 
+# Add turn the fixture spec repos into valid git repositories
 def cocoapods_bazel_specs_prepare_spec_repos
   require 'cocoapods/executable'
 

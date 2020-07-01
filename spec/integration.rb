@@ -18,12 +18,10 @@
 #
 # Notes:
 #
-# - The output of the pod command is saved in the `execution_output.txt` file
+# - The output of the pod command could be saved in the `execution_output.txt` file
 #   which should be added to the `after` folder to test the CocoaPods UI.
 # - To create a new test, just create a before folder with the environment to
 #   test, copy it to the after folder and run the tested pod command inside.
-#   Then just add the tests below this files with the name of the folder and
-#   the arguments.
 #
 # Rationale:
 #
@@ -120,6 +118,7 @@ describe_cli 'pod' do
   end
 
   at_exit do
+    # clean up git directories from preparing the specs repos
     FileUtils.rm_rf Dir[File.join(cocoapods_bazel_specs_cp_repos_dir, '*', '.git')]
   end
 
