@@ -115,7 +115,8 @@ module Pod
           .merge(
             'CONFIGURATION' => configuration.to_s.capitalize,
             'PODS_TARGET_SRCROOT' => ':',
-            'SRCROOT' => ':'
+            'SRCROOT' => ':',
+            'SDKROOT' => '__BAZEL_XCODE_SDKROOT__'
           )
       end
 
