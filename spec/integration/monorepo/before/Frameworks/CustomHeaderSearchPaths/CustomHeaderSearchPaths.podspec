@@ -15,6 +15,6 @@ Pod::Spec.new do |s|
     s.source_files = 'Sources/**/*.{h,m,swift}'
     s.private_header_files = 'Sources/Internal/**/*.h'
     s.pod_target_xcconfig = {
-        'HEADER_SEARCH_PATHS' => ['${PODS_TARGET_SRCROOT}/Sources']
+        'HEADER_SEARCH_PATHS' => ['${PODS_TARGET_SRCROOT}/Sources', '$(SDKROOT)/usr/include/libxml2']
     }
 end
