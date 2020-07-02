@@ -347,6 +347,10 @@ module Pod
           m[1].split(',').flat_map do |alt|
             expand_glob("#{m.pre_match}#{alt}#{m.post_match}")
           end.uniq
+        elsif (m = glob.match(/\[([^\[\]]+)\]/))
+          m[1].each_char.flat_map do |alt|
+            expand_glob("#{m.pre_match}#{alt}#{m.post_match}")
+          end.uniq
         elsif extensions && File.extname(glob).empty?
           extensions.map do |ext|
             glob.chomp!('**/*') # If we reach here and the glob ends with **/*, we need to avoid duplicating it (we do not want to end up with **/*/**/*)
