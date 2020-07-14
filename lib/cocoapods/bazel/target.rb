@@ -244,9 +244,8 @@ module Pod
         kwargs[:vendored_dynamic_libraries] = glob(attr: :vendored_dynamic_libraries, return_files: true)
 
         # any compatible provider: CCProvider, SwiftInfo, etc
-        kwargs[:deps] = dependent_targets
-                        .map { |dt| dt.bazel_label(relative_to: package) }
-                        .sort_by { |l| [l.start_with?(':') ? -2 : -1, l] }
+        labels = dependent_targets.map { |dt| dt.bazel_label(relative_to: package) }
+        kwargs[:deps] = Pod::Bazel::Util.sort_labels(labels)
 
         case non_library_spec&.spec_type
         when :test

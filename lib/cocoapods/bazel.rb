@@ -4,6 +4,7 @@ require 'starlark_compiler/build_file'
 require 'cocoapods/bazel/config'
 require 'cocoapods/bazel/target'
 require 'cocoapods/bazel/xcconfig_resolver'
+require 'cocoapods/bazel/util'
 
 module Pod
   module Bazel
