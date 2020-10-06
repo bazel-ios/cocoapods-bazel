@@ -1,0 +1,16 @@
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+
+string_flag(
+    name = "config",
+    build_setting_default = "debug",
+)
+
+config_setting(
+    name = "debug",
+    flag_values = {":config": "debug"},
+)
+
+config_setting(
+    name = "release",
+    flag_values = {":config": "release"},
+)

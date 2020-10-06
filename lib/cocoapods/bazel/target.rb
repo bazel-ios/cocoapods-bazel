@@ -91,6 +91,22 @@ module Pod
         targets.uniq.map { |target| self.class.new(installer, target) }
       end
 
+      def dependent_targets_by_config
+        targets =
+            case non_library_spec&.spec_type
+            when nil
+              pod_target.dependent_targets_by_config
+            when :app
+              pod_target.app_dependent_targets_by_spec_name_by_config[non_library_spec.name].transform_values { |v| v + [pod_target] }
+            when :test
+              pod_target.test_dependent_targets_by_spec_name_by_config[non_library_spec.name].transform_values { |v| v + [pod_target] }
+            else
+              raise "Unhandled: #{non_library_spec.spec_type}"
+            end
+
+        targets.transform_values { |targets| targets.uniq.map { |target| self.class.new(installer, target) } }
+      end
+
       def product_module_name
         name = resolved_build_setting_value('PRODUCT_MODULE_NAME') || resolved_build_setting_value('PRODUCT_NAME') ||
                if non_library_spec
@@ -244,8 +260,7 @@ module Pod
         kwargs[:vendored_dynamic_libraries] = glob(attr: :vendored_dynamic_libraries, return_files: true)
 
         # any compatible provider: CCProvider, SwiftInfo, etc
-        labels = dependent_targets.map { |dt| dt.bazel_label(relative_to: package) }
-        kwargs[:deps] = Pod::Bazel::Util.sort_labels(labels)
+        kwargs[:deps] = deps_by_config
 
         case non_library_spec&.spec_type
         when :test
@@ -315,6 +330,42 @@ module Pod
 
           deps: []
         }
+      end
+
+      def deps_by_config
+        debug_targets = dependent_targets_by_config[:debug]
+        release_targets = dependent_targets_by_config[:release]
+
+        debug_labels = debug_targets.map { |dt| dt.bazel_label(relative_to: package) }
+        release_labels = release_targets.map { |dt| dt.bazel_label(relative_to: package) }
+        shared_labels = (debug_labels & release_labels).uniq
+
+        debug_only_labels = debug_labels.reject { |x| shared_labels.include? x }
+        release_only_labels = release_labels.reject { |x| shared_labels.include? x }
+
+        sorted_debug_labels = Pod::Bazel::Util.sort_labels(debug_only_labels)
+        sorted_release_labels = Pod::Bazel::Util.sort_labels(release_only_labels)
+        sorted_shared_labels = Pod::Bazel::Util.sort_labels(shared_labels)
+
+        labels_by_config = {}
+
+        if !sorted_debug_labels.empty? || !sorted_release_labels.empty?
+          labels_by_config['//Pods/cocoapods-bazel:debug'] = sorted_debug_labels
+          labels_by_config['//Pods/cocoapods-bazel:release'] = sorted_release_labels
+          labels_by_config['//conditions:default'] = sorted_debug_labels
+        end
+
+        deps = []
+
+        if labels_by_config.empty? # no per-config dependency
+          deps = sorted_shared_labels
+        elsif sorted_shared_labels.empty? # per-config dependencies exist, avoiding adding an empty array
+          deps = StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config)
+        else # both per-config and shared dependencies exist
+          deps = starlark { StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config) + sorted_shared_labels }
+        end
+
+        deps
       end
 
       def glob(attr:, return_files: !pod_target.sandbox.local?(pod_target.pod_name), sorted: true, excludes: [], exclude_directories: 1)
