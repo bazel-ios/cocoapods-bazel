@@ -13,10 +13,21 @@ apple_framework(
     private_headers = glob(["Sources/Internal/**/*.h"]),
     swift_version = "5.2",
     visibility = ["//visibility:public"],
-    deps = [
-        "//Frameworks/c:C",
-        "//Pods/OnlyPre",
-    ],
+    deps = select({
+        ":debug": ["//Frameworks/c:C", "//Pods/OnlyPre"]
+        ":release": ["//Frameworks/c:C"],
+        "//conditions:default": ["//Frameworks/c:C"],
+    }),
+)
+
+config_setting(
+    name = "debug",
+    values = {"config": "debug"},
+)
+
+config_setting(
+    name = "release",
+    values = {"config": "release"},
 )
 
 ios_unit_test(
