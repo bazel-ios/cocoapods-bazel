@@ -93,18 +93,18 @@ module Pod
 
       def dependent_targets_by_config
         targets =
-            case non_library_spec&.spec_type
-            when nil
-              pod_target.dependent_targets_by_config
-            when :app
-              pod_target.app_dependent_targets_by_spec_name_by_config[non_library_spec.name].transform_values { |v| v + [pod_target] }
-            when :test
-              pod_target.test_dependent_targets_by_spec_name_by_config[non_library_spec.name].transform_values { |v| v + [pod_target] }
-            else
-              raise "Unhandled: #{non_library_spec.spec_type}"
-            end
+          case non_library_spec&.spec_type
+          when nil
+            pod_target.dependent_targets_by_config
+          when :app
+            pod_target.app_dependent_targets_by_spec_name_by_config[non_library_spec.name].transform_values { |v| v + [pod_target] }
+          when :test
+            pod_target.test_dependent_targets_by_spec_name_by_config[non_library_spec.name].transform_values { |v| v + [pod_target] }
+          else
+            raise "Unhandled: #{non_library_spec.spec_type}"
+          end
 
-        targets.transform_values { |targets| targets.uniq.map { |target| self.class.new(installer, target) } }
+        targets.transform_values { |v| v.uniq.map { |target| self.class.new(installer, target) } }
       end
 
       def product_module_name
@@ -355,15 +355,13 @@ module Pod
           labels_by_config['//conditions:default'] = sorted_debug_labels
         end
 
-        deps = []
-
-        if labels_by_config.empty? # no per-config dependency
-          deps = sorted_shared_labels
-        elsif sorted_shared_labels.empty? # per-config dependencies exist, avoiding adding an empty array
-          deps = StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config)
-        else # both per-config and shared dependencies exist
-          deps = starlark { StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config) + sorted_shared_labels }
-        end
+        deps = if labels_by_config.empty? # no per-config dependency
+                 sorted_shared_labels
+               elsif sorted_shared_labels.empty? # per-config dependencies exist, avoiding adding an empty array
+                 StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config)
+               else # both per-config and shared dependencies exist
+                 starlark { StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config) + sorted_shared_labels }
+               end
 
         deps
       end

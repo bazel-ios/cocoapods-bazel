@@ -48,34 +48,32 @@ module Pod
     def self.write_cocoapods_bazel_build_file(path, workspace, config)
       FileUtils.touch(File.join(path, 'BUILD.bazel'))
 
-      cocoapods_bazel_pkg = Pathname.new(path).relative_path_from  Pathname.new(workspace)
+      cocoapods_bazel_pkg = Pathname.new(path).relative_path_from Pathname.new(workspace)
       configs_build_file = StarlarkCompiler::BuildFile.new(workspace: workspace, package: cocoapods_bazel_pkg)
 
-      configs_build_file.add_load(of: 'string_flag', from: "@bazel_skylib//rules:common_settings.bzl")
-      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('string_flag', { :name => 'config', :build_setting_default => 'debug' })
-      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', { :name => 'debug', :flag_values => { ':config' => 'debug' } })
-      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', { :name => 'release', :flag_values => { ':config' => 'release' } })
+      configs_build_file.add_load(of: 'string_flag', from: '@bazel_skylib//rules:common_settings.bzl')
+      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('string_flag', name: 'config', build_setting_default: 'debug')
+      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'debug', flag_values: { ':config' => 'debug' })
+      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'release', flag_values: { ':config' => 'release' })
 
       configs_build_file.save!
       format_files(build_files: [configs_build_file], buildifier: config.buildifier, workspace: workspace)
     end
 
     def self.write_non_empty_default_xcconfigs(path, default_xcconfigs)
-      unless default_xcconfigs.empty?
-        hash = StarlarkCompiler::AST.new(toplevel: [
-            StarlarkCompiler::AST::Dictionary.new(default_xcconfigs)
-        ])
+      return if default_xcconfigs.empty?
 
-        File.open(File.join(path, 'default_xcconfigs.bzl'), 'w') do |f|
-          f << <<~STARLARK
-              """
-              Default xcconfigs given as options to cocoapods-bazel.
-              """
+      hash = StarlarkCompiler::AST.new(toplevel: [StarlarkCompiler::AST::Dictionary.new(default_xcconfigs)])
 
-          STARLARK
-          f << 'DEFAULT_XCCONFIGS = '
-          StarlarkCompiler::Writer.write(ast: hash, io: f)
-        end
+      File.open(File.join(path, 'default_xcconfigs.bzl'), 'w') do |f|
+        f << <<~STARLARK
+          """
+          Default xcconfigs given as options to cocoapods-bazel.
+          """
+
+        STARLARK
+        f << 'DEFAULT_XCCONFIGS = '
+        StarlarkCompiler::Writer.write(ast: hash, io: f)
       end
     end
 
