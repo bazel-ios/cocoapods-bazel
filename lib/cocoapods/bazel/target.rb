@@ -56,7 +56,7 @@ module Pod
         relative_sandbox_root = @installer.sandbox.root.relative_path_from(@installer.config.installation_root).to_s
         cocoapods_bazel_path = File.join(relative_sandbox_root, 'cocoapods-bazel')
 
-        "//#{cocoapods_bazel_path}:#{config.to_s}"
+        "//#{cocoapods_bazel_path}:#{config}"
       end
 
       def test_host
@@ -346,12 +346,12 @@ module Pod
         end
 
         if labels_by_config.empty? # no per-config dependency
-         sorted_shared_labels
+          sorted_shared_labels
         elsif sorted_shared_labels.empty? # per-config dependencies exist, avoiding adding an empty array
-         StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config)
-       else # both per-config and shared dependencies exist
-         starlark { StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config) + sorted_shared_labels }
-       end
+          StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config)
+        else # both per-config and shared dependencies exist
+          starlark { StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config) + sorted_shared_labels }
+        end
       end
 
       def glob(attr:, return_files: !pod_target.sandbox.local?(pod_target.pod_name), sorted: true, excludes: [], exclude_directories: 1)
