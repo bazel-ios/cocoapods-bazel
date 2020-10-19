@@ -52,6 +52,13 @@ module Pod
         end
       end
 
+      def build_settings_label(config)
+        relative_sandbox_root = @installer.sandbox.root.relative_path_from(@installer.config.installation_root).to_s
+        cocoapods_bazel_path = File.join(relative_sandbox_root, 'cocoapods-bazel')
+
+        "//#{cocoapods_bazel_path}:#{config.to_s}"
+      end
+
       def test_host
         unless (app_host_info = pod_target.test_app_hosts_by_spec_name[non_library_spec.name])
           return
@@ -334,8 +341,8 @@ module Pod
         labels_by_config = {}
 
         if !sorted_debug_labels.empty? || !sorted_release_labels.empty?
-          labels_by_config['//Pods/cocoapods-bazel:debug'] = sorted_debug_labels
-          labels_by_config['//Pods/cocoapods-bazel:release'] = sorted_release_labels
+          labels_by_config[build_settings_label(:debug)] = sorted_debug_labels
+          labels_by_config[build_settings_label(:release)] = sorted_release_labels
           labels_by_config['//conditions:default'] = sorted_debug_labels
         end
 
