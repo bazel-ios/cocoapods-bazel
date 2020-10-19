@@ -16,7 +16,6 @@ apple_framework(
     deps = select({
         "//Pods/cocoapods-bazel:debug": ["//Pods/OnlyPre"],
         "//Pods/cocoapods-bazel:release": ["//Frameworks/d:D"],
-        "//conditions:default": ["//Pods/OnlyPre"],
     }) + [
         "//Frameworks/a:A",
         "//Frameworks/c:C",
