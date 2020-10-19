@@ -331,8 +331,8 @@ module Pod
         release_labels = release_targets.map { |dt| dt.bazel_label(relative_to: package) }
         shared_labels = (debug_labels & release_labels).uniq
 
-        debug_only_labels = debug_labels.reject { |x| shared_labels.include? x }
-        release_only_labels = release_labels.reject { |x| shared_labels.include? x }
+        debug_only_labels = debug_labels - shared_labels
+        release_only_labels = release_labels - shared_labels
 
         sorted_debug_labels = Pod::Bazel::Util.sort_labels(debug_only_labels)
         sorted_release_labels = Pod::Bazel::Util.sort_labels(release_only_labels)
