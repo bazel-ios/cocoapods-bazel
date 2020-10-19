@@ -75,22 +75,6 @@ module Pod
         end
       end
 
-      def dependent_targets
-        targets =
-          case non_library_spec&.spec_type
-          when nil
-            pod_target.dependent_targets
-          when :app
-            pod_target.app_dependent_targets_by_spec_name[non_library_spec.name] + [pod_target]
-          when :test
-            pod_target.test_dependent_targets_by_spec_name[non_library_spec.name] + [pod_target]
-          else
-            raise "Unhandled: #{non_library_spec.spec_type}"
-          end
-
-        targets.uniq.map { |target| self.class.new(installer, target) }
-      end
-
       def dependent_targets_by_config
         targets =
           case non_library_spec&.spec_type
