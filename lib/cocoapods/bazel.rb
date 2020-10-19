@@ -57,7 +57,7 @@ module Pod
       configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'release', flag_values: { ':config' => 'release' })
 
       configs_build_file.save!
-      format_files(build_files: [configs_build_file], buildifier: config.buildifier, workspace: workspace)
+      format_files(build_files: { cocoapods_bazel_pkg => configs_build_file }, buildifier: config.buildifier, workspace: workspace)
     end
 
     def self.write_non_empty_default_xcconfigs(path, default_xcconfigs)
