@@ -1,0 +1,54 @@
+load("@build_bazel_rules_ios//rules:app.bzl", "ios_application")
+load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
+load("@build_bazel_rules_ios//rules:test.bzl", "ios_unit_test")
+
+apple_framework(
+    name = "SelectPerConfigWithSharedDeps",
+    srcs = glob([
+        "Sources/**/*.h",
+        "Sources/**/*.m",
+        "Sources/**/*.swift",
+    ]),
+    platforms = {"ios": "9.0"},
+    private_headers = glob(["Sources/Internal/**/*.h"]),
+    swift_version = "5.2",
+    visibility = ["//visibility:public"],
+    deps = select({
+        "//Pods/cocoapods-bazel:debug": ["//Pods/OnlyPre"],
+        "//Pods/cocoapods-bazel:release": ["//Frameworks/d:D"],
+    }) + [
+        "//Frameworks/a:A",
+        "//Frameworks/c:C",
+    ],
+)
+
+ios_unit_test(
+    name = "SelectPerConfigWithSharedDeps-Unit-Tests",
+    srcs = glob([
+        "Tests/**/*.h",
+        "Tests/**/*.m",
+        "Tests/**/*.swift",
+    ]),
+    minimum_os_version = "9.0",
+    module_name = "SelectPerConfigWithSharedDeps_Unit_Tests",
+    swift_version = "5.2",
+    deps = [":SelectPerConfigWithSharedDeps"],
+)
+
+ios_application(
+    name = "SelectPerConfigWithSharedDeps-App",
+    srcs = glob([
+        "App/**/*.h",
+        "App/**/*.m",
+        "App/**/*.swift",
+    ]),
+    bundle_id = "org.cocoapods.SelectPerConfigWithSharedDeps-App",
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    minimum_os_version = "9.0",
+    module_name = "SelectPerConfigWithSharedDeps_App",
+    swift_version = "5.2",
+    deps = [":SelectPerConfigWithSharedDeps"],
+)

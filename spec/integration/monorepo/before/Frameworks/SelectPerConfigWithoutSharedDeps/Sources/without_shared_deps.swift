@@ -1,0 +1,1 @@
+// without_shared_deps Swift
