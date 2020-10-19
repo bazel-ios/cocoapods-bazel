@@ -339,15 +339,13 @@ module Pod
           labels_by_config['//conditions:default'] = sorted_debug_labels
         end
 
-        deps = if labels_by_config.empty? # no per-config dependency
-                 sorted_shared_labels
-               elsif sorted_shared_labels.empty? # per-config dependencies exist, avoiding adding an empty array
-                 StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config)
-               else # both per-config and shared dependencies exist
-                 starlark { StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config) + sorted_shared_labels }
-               end
-
-        deps
+        if labels_by_config.empty? # no per-config dependency
+         sorted_shared_labels
+        elsif sorted_shared_labels.empty? # per-config dependencies exist, avoiding adding an empty array
+         StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config)
+       else # both per-config and shared dependencies exist
+         starlark { StarlarkCompiler::AST::FunctionCall.new('select', labels_by_config) + sorted_shared_labels }
+       end
       end
 
       def glob(attr:, return_files: !pod_target.sandbox.local?(pod_target.pod_name), sorted: true, excludes: [], exclude_directories: 1)
