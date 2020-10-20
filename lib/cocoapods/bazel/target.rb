@@ -109,6 +109,10 @@ module Pod
         name.gsub(/^([0-9])/, '_\1').gsub(/[^a-zA-Z0-9_]/, '_')
       end
 
+      def swift_objc_bridging_header
+        resolved_build_setting_value('SWIFT_OBJC_BRIDGING_HEADER')
+      end
+
       def uses_swift?
         file_accessors.any? { |fa| fa.source_files.any? { |s| s.extname == '.swift' } }
       end
@@ -153,6 +157,7 @@ module Pod
             .add(:data, glob(attr: :resources, exclude_directories: 0), defaults: [[]])
             .add(:resource_bundles, {}, defaults: [{}])
             .add(:swift_version, uses_swift? && pod_target.swift_version, defaults: [nil, false])
+            .add(:swift_objc_bridging_header, swift_objc_bridging_header, defaults: [nil])
 
           # xcconfigs
           resolve_xcconfig(pod_target_xcconfig, default_xcconfigs: default_xcconfigs).tap do |name, xcconfig|
