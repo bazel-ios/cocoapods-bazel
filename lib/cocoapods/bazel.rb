@@ -24,8 +24,10 @@ module Pod
           package = sandbox.pod_dir(pod_target.pod_name).relative_path_from(workspace).to_s
           build_file = build_files[package]
 
-          bazel_targets = [Target.new(installer, pod_target, nil, default_xcconfigs)] +
-                          pod_target.file_accessors.reject { |fa| fa.spec.library_specification? }.map { |fa| Target.new(installer, pod_target, fa.spec, default_xcconfigs) }
+          bazel_targets = [Target.new(installer, pod_target, config.configuration, nil, default_xcconfigs)] +
+                          pod_target.file_accessors.reject { |fa| fa.spec.library_specification? }.map do |fa|
+                            Target.new(installer, pod_target, config.configuration, fa.spec, default_xcconfigs)
+                          end
 
           bazel_targets.each do |t|
             load = config.load_for(macro: t.type)

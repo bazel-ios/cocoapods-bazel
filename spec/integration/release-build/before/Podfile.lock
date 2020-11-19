@@ -1,0 +1,20 @@
+PODS:
+  - A (1.0.0.LOCAL)
+  - A/App (1.0.0.LOCAL)
+  - A/Tests (1.0.0.LOCAL)
+
+DEPENDENCIES:
+  - A (from `Frameworks/a/A.podspec`)
+  - A/App (from `Frameworks/a/A.podspec`)
+  - A/Tests (from `Frameworks/a/A.podspec`)
+
+EXTERNAL SOURCES:
+  A:
+    :path: Frameworks/a/A.podspec
+
+SPEC CHECKSUMS:
+  A: e8820694af7efef42a132c6037870dd0a248b0bf
+
+PODFILE CHECKSUM: f3dd42a98d714cceb6c227bd7021c7049e5a3f30
+
+COCOAPODS: 1.9.3

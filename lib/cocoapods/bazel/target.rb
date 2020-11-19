@@ -27,12 +27,13 @@ module Pod
 
       include XCConfigResolver
 
-      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
-      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
+      attr_reader :installer, :pod_target, :configuration, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
+      private :installer, :pod_target, :configuration, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
 
-      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {})
+      def initialize(installer, pod_target, configuration, non_library_spec = nil, default_xcconfigs = {})
         @installer = installer
         @pod_target = pod_target
+        @configuration = configuration
         @file_accessors = non_library_spec ? pod_target.file_accessors.select { |fa| fa.spec == non_library_spec } : pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
         @non_library_spec = non_library_spec
         @label = (non_library_spec ? pod_target.non_library_spec_label(non_library_spec) : pod_target.label)
@@ -65,7 +66,7 @@ module Pod
         end
 
         app_spec, app_target = *app_host_info
-        Target.new(installer, app_target, app_spec)
+        Target.new(installer, app_target, configuration, app_spec)
       end
 
       def type
@@ -95,7 +96,7 @@ module Pod
             raise "Unhandled: #{non_library_spec.spec_type}"
           end
 
-        targets.transform_values { |v| v.uniq.map { |target| self.class.new(installer, target) } }
+        targets.transform_values { |v| v.uniq.map { |target| self.class.new(installer, target, configuration) } }
       end
 
       def product_module_name
@@ -113,8 +114,7 @@ module Pod
         file_accessors.any? { |fa| fa.source_files.any? { |s| s.extname == '.swift' } }
       end
 
-      # TODO: handle both configs
-      def pod_target_xcconfig(configuration: :debug)
+      def pod_target_xcconfig
         pod_target
           .build_settings_for_spec(non_library_spec || pod_target.root_spec, configuration: configuration)
           .merged_pod_target_xcconfigs
