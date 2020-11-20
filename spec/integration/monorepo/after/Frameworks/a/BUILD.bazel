@@ -43,5 +43,16 @@ ios_application(
     minimum_os_version = "10.0",
     module_name = "A_App",
     swift_version = "5.2",
+    xcconfig = {
+        "ARCHS": [
+            "arm64",
+            "x86",
+        ],
+        "VERSIONING_SYSTEM": "apple-generic",
+    },
+    xcconfig_by_build_setting = {
+        "//Pods/cocoapods-bazel:debug": {"SWIFT_OPTIMIZATION_LEVEL": "-Onone"},
+        "//Pods/cocoapods-bazel:release": {"SWIFT_OPTIMIZATION_LEVEL": "-Owholemodule"},
+    },
     deps = [":A"],
 )

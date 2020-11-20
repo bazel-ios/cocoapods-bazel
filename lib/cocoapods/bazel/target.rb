@@ -117,7 +117,35 @@ module Pod
         file_accessors.any? { |fa| fa.source_files.any? { |s| s.extname == '.swift' } }
       end
 
-      # TODO: handle both configs
+      def pod_target_xcconfig_by_build_setting
+        debug_xcconfig = resolved_xcconfig(configuration: :debug)
+        release_xcconfig = resolved_xcconfig(configuration: :release)
+        debug_only_xcconfig = debug_xcconfig.reject { |k, v| release_xcconfig[k] == v }
+        release_only_xcconfig = release_xcconfig.reject { |k, v| debug_xcconfig[k] == v }
+
+        xconfig_by_build_setting = {}
+        xconfig_by_build_setting[build_settings_label(:debug)] = debug_only_xcconfig unless debug_only_xcconfig.empty?
+        xconfig_by_build_setting[build_settings_label(:release)] = release_only_xcconfig unless release_only_xcconfig.empty?
+        xconfig_by_build_setting
+      end
+
+      def common_pod_target_xcconfig
+        debug_xcconfig = resolved_xcconfig(configuration: :debug)
+        release_xcconfig = resolved_xcconfig(configuration: :release)
+        common_xcconfig = debug_xcconfig.select { |k, v| release_xcconfig[k] == v }
+        # If the value is an array, merge it into a string.
+        common_xcconfig.map do |k, v|
+          [k, v.is_a?(Array) ? v.join(' ') : v]
+        end.to_h
+      end
+
+      def resolved_xcconfig(configuration:)
+        xcconfig = pod_target_xcconfig(configuration: configuration)
+        xcconfig = resolve_xcconfig(xcconfig)[1]
+        # Deletes configuration specific entries as they're not used any more.
+        xcconfig.delete_if { |k, _| %w[Debug Release].any? { |c| k.end_with?(c) } }
+      end
+
       def pod_target_xcconfig(configuration: :debug)
         pod_target
           .build_settings_for_spec(non_library_spec || pod_target.root_spec, configuration: configuration)
@@ -160,11 +188,13 @@ module Pod
             .add(:swift_objc_bridging_header, swift_objc_bridging_header, defaults: [nil])
 
           # xcconfigs
-          resolve_xcconfig(pod_target_xcconfig, default_xcconfigs: default_xcconfigs).tap do |name, xcconfig|
+          resolve_xcconfig(common_pod_target_xcconfig, default_xcconfigs: default_xcconfigs).tap do |name, xcconfig|
             args
               .add(:default_xcconfig_name, name, defaults: [nil])
               .add(:xcconfig, xcconfig, defaults: [{}])
           end
+          # xcconfig_by_build_setting
+          args.add(:xcconfig_by_build_setting, pod_target_xcconfig_by_build_setting, defaults: [{}])
         end.kwargs
 
         file_accessors.group_by { |fa| fa.spec_consumer.requires_arc.class }.tap do |fa_by_arc|

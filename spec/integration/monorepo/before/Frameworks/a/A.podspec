@@ -21,5 +21,13 @@ Pod::Spec.new do |s|
 
   s.app_spec 'App' do |as|
     as.source_files = 'App/**/*.{h,m,swift}'
+
+    as.pod_target_xcconfig = {
+      'ARCHS' => 'arm64 x86',
+      'VERSIONING_SYSTEM' => 'apple-generic',
+      'SWIFT_OPTIMIZATION_LEVEL' => "$(SWIFT_OPTIMIZATION_LEVEL_$(CONFIGURATION))",
+      'SWIFT_OPTIMIZATION_LEVEL_Debug' => '-Onone',
+      'SWIFT_OPTIMIZATION_LEVEL_Release' => '-Owholemodule'
+    }
   end
 end
