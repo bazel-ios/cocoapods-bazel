@@ -159,6 +159,22 @@ module Pod
           )
       end
 
+      def resolved_value_by_build_setting(setting, additional_settings: {})
+        debug_settings = pod_target_xcconfig(configuration: :debug).merge(additional_settings)
+        debug_value = resolved_build_setting_value(setting, settings: debug_settings)
+        release_settings = pod_target_xcconfig(configuration: :release).merge(additional_settings)
+        release_value = resolved_build_setting_value(setting, settings: release_settings)
+        if debug_value == release_value
+          debug_value
+        else
+          value_by_build_setting = {
+            build_settings_label(:debug) => debug_value,
+            build_settings_label(:release) => release_value
+          }
+          StarlarkCompiler::AST::FunctionCall.new('select', value_by_build_setting)
+        end
+      end
+
       def resolved_build_setting_value(setting, settings: pod_target_xcconfig)
         super(setting, settings: settings)
       end
@@ -450,7 +466,7 @@ module Pod
 
       def test_kwargs
         {
-          bundle_id: resolved_build_setting_value('PRODUCT_BUNDLE_IDENTIFIER'),
+          bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER'),
           env: pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {}),
           infoplists: [resolved_build_setting_value('INFOPLIST_FILE')].compact,
           minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
@@ -461,9 +477,9 @@ module Pod
       def app_kwargs
         {
           app_icons: [],
-          bundle_id: resolved_build_setting_value('PRODUCT_BUNDLE_IDENTIFIER') || "org.cocoapods.#{label}",
+          bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER') || "org.cocoapods.#{label}",
           bundle_name: nil,
-          entitlements: resolved_build_setting_value('CODE_SIGN_ENTITLEMENTS'),
+          entitlements: resolved_value_by_build_setting('CODE_SIGN_ENTITLEMENTS'),
           entitlements_validation: nil,
           extensions: [],
           families: %w[iphone ipad],

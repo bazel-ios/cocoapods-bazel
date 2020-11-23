@@ -23,9 +23,17 @@ ios_unit_test(
         "Tests/**/*.m",
         "Tests/**/*.swift",
     ]),
+    bundle_id = select({
+        "//Pods/cocoapods-bazel:debug": "org.cocoapods.B-Test.Debug",
+        "//Pods/cocoapods-bazel:release": "org.cocoapods.B-Test",
+    }),
     minimum_os_version = "10.0",
     module_name = "B_Unit_Tests",
     swift_version = "5.2",
+    xcconfig_by_build_setting = {
+        "//Pods/cocoapods-bazel:debug": {"PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-Test.Debug"},
+        "//Pods/cocoapods-bazel:release": {"PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-Test"},
+    },
     deps = [":B"],
 )
 
@@ -36,7 +44,14 @@ ios_application(
         "App/**/*.m",
         "App/**/*.swift",
     ]),
-    bundle_id = "org.cocoapods.B-App",
+    bundle_id = select({
+        "//Pods/cocoapods-bazel:debug": "org.cocoapods.B-App.Debug",
+        "//Pods/cocoapods-bazel:release": "org.cocoapods.B-App",
+    }),
+    entitlements = select({
+        "//Pods/cocoapods-bazel:debug": "Resources/debug.entitlements",
+        "//Pods/cocoapods-bazel:release": "Resources/release.entitlements",
+    }),
     families = [
         "iphone",
         "ipad",
@@ -44,5 +59,15 @@ ios_application(
     minimum_os_version = "10.0",
     module_name = "B_App",
     swift_version = "5.2",
+    xcconfig_by_build_setting = {
+        "//Pods/cocoapods-bazel:debug": {
+            "CODE_SIGN_ENTITLEMENTS": "Resources/debug.entitlements",
+            "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-App.Debug",
+        },
+        "//Pods/cocoapods-bazel:release": {
+            "CODE_SIGN_ENTITLEMENTS": "Resources/release.entitlements",
+            "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-App",
+        },
+    },
     deps = [":B"],
 )
