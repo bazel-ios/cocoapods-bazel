@@ -99,12 +99,14 @@ module Pod
       end
 
       def product_module_name
-        name = resolved_build_setting_value('PRODUCT_MODULE_NAME') || resolved_build_setting_value('PRODUCT_NAME') ||
+        name = resolved_value_by_build_setting('PRODUCT_MODULE_NAME') || resolved_value_by_build_setting('PRODUCT_NAME') ||
                if non_library_spec
                  label.tr('-', '_')
                else
                  pod_target.product_module_name
                end
+
+        raise 'The product module name must be the same for both debug and release.' unless name.is_a? String
 
         name.gsub(/^([0-9])/, '_\1').gsub(/[^a-zA-Z0-9_]/, '_')
       end
