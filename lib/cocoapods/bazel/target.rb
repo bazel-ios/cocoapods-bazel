@@ -338,7 +338,6 @@ module Pod
         linkopts = resolved_value_by_build_setting('OTHER_LDFLAGS')
         linkopts = [linkopts] if linkopts.is_a? String
         kwargs[:linkopts] = linkopts || []
-        # kwargs[:cc_copts] = resolved_build_setting_value('${OTHER_CFLAGS} ${OTHER_CPPFLAGS}') || []
 
         # propagated
         kwargs[:defines] = []
