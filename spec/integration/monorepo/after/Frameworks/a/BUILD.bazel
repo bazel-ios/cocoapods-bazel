@@ -40,8 +40,19 @@ ios_application(
         "iphone",
         "ipad",
     ],
+    linkopts = ["-all_load"],
     minimum_os_version = "10.0",
     module_name = "A_App",
+    objc_copts = [
+        "-Wno-conversion",
+        "-Wno-error=at-protocol",
+        "-I/Headers/Private",
+    ],
+    swift_copts = [
+        "-DDEBUG",
+        "-Xcc",
+        "-I/Headers/Private",
+    ],
     swift_version = "5.2",
     xcconfig = {
         "ARCHS": [

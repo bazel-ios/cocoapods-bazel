@@ -179,12 +179,77 @@ module Pod
         super(setting, settings: settings)
       end
 
-      def pod_target_xcconfig_header_search_paths
-        resolved_build_setting_value('HEADER_SEARCH_PATHS', settings: pod_target_xcconfig.merge('PODS_TARGET_SRCROOT' => @package)) || []
+      def pod_target_xcconfig_header_search_paths(configuration)
+        settings = pod_target_xcconfig(configuration: configuration).merge('PODS_TARGET_SRCROOT' => @package)
+        resolved_build_setting_value('HEADER_SEARCH_PATHS', settings: settings) || []
       end
 
-      def pod_target_xcconfig_user_header_search_paths
-        resolved_build_setting_value('USER_HEADER_SEARCH_PATHS', settings: pod_target_xcconfig.merge('PODS_TARGET_SRCROOT' => @package)) || []
+      def pod_target_xcconfig_user_header_search_paths(configuration)
+        settings = pod_target_xcconfig(configuration: configuration).merge('PODS_TARGET_SRCROOT' => @package)
+        resolved_build_setting_value('USER_HEADER_SEARCH_PATHS', settings: settings) || []
+      end
+
+      def pod_target_copts(type)
+        setting =
+          case type
+          when :swift then 'OTHER_SWIFT_FLAGS'
+          when :objc then 'OTHER_CFLAGS'
+          else raise "#Unsupported type #{type}"
+          end
+        copts = resolved_value_by_build_setting(setting)
+        copts = [copts] if copts&.is_a?(String)
+
+        debug_copts = copts_for_search_paths_by_config(type, :debug)
+        release_copts = copts_for_search_paths_by_config(type, :release)
+        copts_for_search_paths =
+          if debug_copts.sort == release_copts.sort
+            debug_copts
+          else
+            copts_by_build_setting = {
+              build_settings_label(:debug) => debug_copts,
+              build_settings_label(:release) => release_copts
+            }
+            StarlarkCompiler::AST::FunctionCall.new('select', copts_by_build_setting)
+          end
+
+        if copts
+          if copts.is_a?(Array)
+            if copts_for_search_paths.is_a?(Array)
+              copts + copts_for_search_paths
+            else
+              starlark { copts_for_search_paths + copts }
+            end
+          elsif copts_for_search_paths.is_a?(Array) && copts_for_search_paths.empty?
+            copts
+          else
+            starlark { copts + copts_for_search_paths }
+          end
+        else
+          copts_for_search_paths
+        end
+      end
+
+      def copts_for_search_paths_by_config(type, configuration)
+        additional_flag =
+          case type
+          when :swift then '-Xcc'
+          when :objc then nil
+          else raise "#Unsupported type #{type}"
+          end
+
+        copts = []
+        pod_target_xcconfig_header_search_paths(configuration).each do |path|
+          iquote = "-I#{path}"
+          copts << additional_flag if additional_flag
+          copts << iquote
+        end
+
+        pod_target_xcconfig_user_header_search_paths(configuration).each do |path|
+          iquote = "-iquote#{path}"
+          copts << additional_flag if additional_flag
+          copts << iquote
+        end
+        copts
       end
 
       def to_rule_kwargs
@@ -268,26 +333,15 @@ module Pod
         end
 
         # non-propagated stuff
-        kwargs[:swift_copts] = resolved_build_setting_value('OTHER_SWIFT_FLAGS') || []
-        kwargs[:objc_copts] = resolved_build_setting_value('OTHER_CFLAGS') || []
-        kwargs[:linkopts] = resolved_build_setting_value('OTHER_LDFLAGS') || []
+        kwargs[:swift_copts] = pod_target_copts(:swift)
+        kwargs[:objc_copts] = pod_target_copts(:objc)
+        linkopts = resolved_value_by_build_setting('OTHER_LDFLAGS')
+        linkopts = [linkopts] if linkopts.is_a? String
+        kwargs[:linkopts] = linkopts || []
         # kwargs[:cc_copts] = resolved_build_setting_value('${OTHER_CFLAGS} ${OTHER_CPPFLAGS}') || []
-
-        pod_target_xcconfig_header_search_paths.each do |path|
-          iquote = "-I#{path}"
-          kwargs[:objc_copts] << iquote
-          kwargs[:swift_copts] << '-Xcc' << iquote
-        end
-
-        pod_target_xcconfig_user_header_search_paths.each do |path|
-          i = "-iquote#{path}"
-          kwargs[:objc_copts] << i
-          kwargs[:swift_copts] << '-Xcc' << i
-        end
 
         # propagated
         kwargs[:defines] = []
-        kwargs[:linkopts] = []
         kwargs[:other_inputs] = []
         kwargs[:linking_style] = nil
         kwargs[:runtime_deps] = []
@@ -491,7 +545,6 @@ module Pod
           ipa_post_processor: nil,
           launch_images: [],
           launch_storyboard: nil,
-          linkopts: [],
           minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
           provisioning_profile: nil,
           resources: [],

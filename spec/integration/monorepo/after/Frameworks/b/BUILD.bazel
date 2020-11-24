@@ -58,6 +58,23 @@ ios_application(
     ],
     minimum_os_version = "10.0",
     module_name = "B_App",
+    objc_copts = select({
+        "//Pods/cocoapods-bazel:debug": ["-I/Headers/Private/Debug"],
+        "//Pods/cocoapods-bazel:release": ["-I/Headers/Private/Release"],
+    }) + [
+        "-Wno-conversion",
+        "-Wno-error=at-protocol",
+    ],
+    swift_copts = select({
+        "//Pods/cocoapods-bazel:debug": [
+            "-Xcc",
+            "-I/Headers/Private/Debug",
+        ],
+        "//Pods/cocoapods-bazel:release": [
+            "-Xcc",
+            "-I/Headers/Private/Release",
+        ],
+    }),
     swift_version = "5.2",
     xcconfig_by_build_setting = {
         "//Pods/cocoapods-bazel:debug": {

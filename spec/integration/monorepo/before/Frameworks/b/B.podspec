@@ -29,6 +29,10 @@ Pod::Spec.new do |s|
   s.app_spec 'App' do |as|
     as.source_files = 'App/**/*.{h,m,swift}'
     as.pod_target_xcconfig = {
+      'HEADER_SEARCH_PATHS'=> "$(HEADER_SEARCH_PATHS_$(CONFIGURATION))",
+      'HEADER_SEARCH_PATHS_Debug'=> "${PODS_ROOT}/Headers/Private/Debug",
+      'HEADER_SEARCH_PATHS_Release'=> "${PODS_ROOT}/Headers/Private/Release",
+      'OTHER_CFLAGS' => '-Wno-conversion -Wno-error=at-protocol',
       'CODE_SIGN_ENTITLEMENTS' => '$(CODE_SIGN_ENTITLEMENTS_$(CONFIGURATION))',
       'CODE_SIGN_ENTITLEMENTS_Debug' => '$(PODS_TARGET_SRCROOT)/Resources/debug.entitlements',
       'CODE_SIGN_ENTITLEMENTS_Release' => '$(PODS_TARGET_SRCROOT)/Resources/release.entitlements',

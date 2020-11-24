@@ -24,6 +24,10 @@ Pod::Spec.new do |s|
 
     as.pod_target_xcconfig = {
       'ARCHS' => 'arm64 x86',
+      'HEADER_SEARCH_PATHS'=> "${PODS_ROOT}/Headers/Private",
+      'OTHER_CFLAGS' => '-Wno-conversion -Wno-error=at-protocol',
+      'OTHER_LDFLAGS' => '-all_load',
+      'OTHER_SWIFT_FLAGS' => '-DDEBUG',
       'VERSIONING_SYSTEM' => 'apple-generic',
       'SWIFT_OPTIMIZATION_LEVEL' => "$(SWIFT_OPTIMIZATION_LEVEL_$(CONFIGURATION))",
       'SWIFT_OPTIMIZATION_LEVEL_Debug' => '-Onone',
