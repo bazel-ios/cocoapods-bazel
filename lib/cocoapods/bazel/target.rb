@@ -254,6 +254,29 @@ module Pod
         copts
       end
 
+      def pod_target_infoplists_by_build_setting
+        debug_plist = resolved_build_setting_value('INFOPLIST_FILE', settings: pod_target_xcconfig(configuration: :debug))
+        release_plist = resolved_build_setting_value('INFOPLIST_FILE', settings: pod_target_xcconfig(configuration: :release))
+        if debug_plist == release_plist
+          []
+        else
+          plist_by_build_setting = {}
+          plist_by_build_setting[build_settings_label(:debug)] = debug_plist if debug_plist
+          plist_by_build_setting[build_settings_label(:release)] = release_plist if release_plist
+          plist_by_build_setting
+        end
+      end
+
+      def common_pod_target_infoplists(additional_plist: nil)
+        debug_plist = resolved_build_setting_value('INFOPLIST_FILE', settings: pod_target_xcconfig(configuration: :debug))
+        release_plist = resolved_build_setting_value('INFOPLIST_FILE', settings: pod_target_xcconfig(configuration: :release))
+        if debug_plist == release_plist
+          [debug_plist, additional_plist].compact
+        else
+          [additional_plist].compact
+        end
+      end
+
       def to_rule_kwargs
         kwargs = RuleArgs.new do |args|
           args
@@ -399,6 +422,7 @@ module Pod
 
           bundle_id: nil,
           env: {},
+          infoplists_by_build_setting: [],
           infoplists: [],
           minimum_os_version: nil,
           test_host: nil,
@@ -523,7 +547,8 @@ module Pod
         {
           bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER'),
           env: pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {}),
-          infoplists: [resolved_build_setting_value('INFOPLIST_FILE')].compact,
+          infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
+          infoplists: common_pod_target_infoplists,
           minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
           test_host: test_host&.bazel_label(relative_to: package) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
         }
@@ -539,10 +564,8 @@ module Pod
           extensions: [],
           families: %w[iphone ipad],
           frameworks: [],
-          infoplists: [
-            resolved_build_setting_value('INFOPLIST_FILE'),
-            nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)
-          ].compact,
+          infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
+          infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)),
           ipa_post_processor: nil,
           launch_images: [],
           launch_storyboard: nil,

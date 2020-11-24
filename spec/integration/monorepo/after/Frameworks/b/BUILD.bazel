@@ -56,6 +56,10 @@ ios_application(
         "iphone",
         "ipad",
     ],
+    infoplists_by_build_setting = {
+        "//Pods/cocoapods-bazel:debug": "Resources/debug.plist",
+        "//Pods/cocoapods-bazel:release": "Resources/release.plist",
+    },
     minimum_os_version = "10.0",
     module_name = "B_App",
     objc_copts = select({
@@ -78,10 +82,12 @@ ios_application(
     swift_version = "5.2",
     xcconfig_by_build_setting = {
         "//Pods/cocoapods-bazel:debug": {
+            "INFOPLIST_FILE": "Resources/debug.plist",
             "CODE_SIGN_ENTITLEMENTS": "Resources/debug.entitlements",
             "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-App.Debug",
         },
         "//Pods/cocoapods-bazel:release": {
+            "INFOPLIST_FILE": "Resources/release.plist",
             "CODE_SIGN_ENTITLEMENTS": "Resources/release.entitlements",
             "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-App",
         },
