@@ -30,6 +30,10 @@ ios_unit_test(
     minimum_os_version = "10.0",
     module_name = "B_Unit_Tests",
     swift_version = "5.2",
+    xcconfig = {
+        "PRODUCT_BUNDLE_IDENTIFIER_Debug": "org.cocoapods.B-Test.Debug",
+        "PRODUCT_BUNDLE_IDENTIFIER_Release": "org.cocoapods.B-Test",
+    },
     xcconfig_by_build_setting = {
         "//Pods/cocoapods-bazel:debug": {"PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-Test.Debug"},
         "//Pods/cocoapods-bazel:release": {"PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-Test"},
@@ -80,6 +84,16 @@ ios_application(
         ],
     }),
     swift_version = "5.2",
+    xcconfig = {
+        "HEADER_SEARCH_PATHS_Debug": "/Headers/Private/Debug",
+        "HEADER_SEARCH_PATHS_Release": "/Headers/Private/Release",
+        "INFOPLIST_FILE_Debug": "Resources/debug.plist",
+        "INFOPLIST_FILE_Release": "Resources/release.plist",
+        "CODE_SIGN_ENTITLEMENTS_Debug": "Resources/debug.entitlements",
+        "CODE_SIGN_ENTITLEMENTS_Release": "Resources/release.entitlements",
+        "PRODUCT_BUNDLE_IDENTIFIER_Debug": "org.cocoapods.B-App.Debug",
+        "PRODUCT_BUNDLE_IDENTIFIER_Release": "org.cocoapods.B-App",
+    },
     xcconfig_by_build_setting = {
         "//Pods/cocoapods-bazel:debug": {
             "INFOPLIST_FILE": "Resources/debug.plist",

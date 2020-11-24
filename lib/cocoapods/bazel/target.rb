@@ -27,8 +27,8 @@ module Pod
 
       include XCConfigResolver
 
-      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
-      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
+      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
+      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
 
       def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {})
         @installer = installer
@@ -39,6 +39,7 @@ module Pod
         @package_dir = installer.sandbox.pod_dir(pod_target.pod_name)
         @package = installer.sandbox.pod_dir(pod_target.pod_name).relative_path_from(installer.config.installation_root).to_s
         @default_xcconfigs = default_xcconfigs
+        @resolved_xconfig_by_config = {}
       end
 
       def bazel_label(relative_to: nil)
@@ -112,7 +113,7 @@ module Pod
       end
 
       def swift_objc_bridging_header
-        resolved_build_setting_value('SWIFT_OBJC_BRIDGING_HEADER')
+        resolved_value_by_build_setting('SWIFT_OBJC_BRIDGING_HEADER')
       end
 
       def uses_swift?
@@ -137,18 +138,19 @@ module Pod
         common_xcconfig = debug_xcconfig.select { |k, v| release_xcconfig[k] == v }
         # If the value is an array, merge it into a string.
         common_xcconfig.map do |k, v|
-          [k, v.is_a?(Array) ? v.join(' ') : v]
+          [k, v.is_a?(Array) ? v.shelljoin : v]
         end.to_h
       end
 
       def resolved_xcconfig(configuration:)
-        xcconfig = pod_target_xcconfig(configuration: configuration)
-        xcconfig = resolve_xcconfig(xcconfig)[1]
-        # Deletes configuration specific entries as they're not used any more.
-        xcconfig.delete_if { |k, _| %w[Debug Release].any? { |c| k.end_with?(c) } }
+        unless resolved_xconfig_by_config[configuration]
+          xcconfig = pod_target_xcconfig(configuration: configuration)
+          resolved_xconfig_by_config[configuration] = resolve_xcconfig(xcconfig)[1]
+        end
+        resolved_xconfig_by_config[configuration].clone
       end
 
-      def pod_target_xcconfig(configuration: :debug)
+      def pod_target_xcconfig(configuration:)
         pod_target
           .build_settings_for_spec(non_library_spec || pod_target.root_spec, configuration: configuration)
           .merged_pod_target_xcconfigs
@@ -175,10 +177,6 @@ module Pod
           }
           StarlarkCompiler::AST::FunctionCall.new('select', value_by_build_setting)
         end
-      end
-
-      def resolved_build_setting_value(setting, settings: pod_target_xcconfig)
-        super(setting, settings: settings)
       end
 
       def pod_target_xcconfig_header_search_paths(configuration)

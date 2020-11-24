@@ -60,6 +60,8 @@ ios_application(
             "x86",
         ],
         "VERSIONING_SYSTEM": "apple-generic",
+        "SWIFT_OPTIMIZATION_LEVEL_Debug": "-Onone",
+        "SWIFT_OPTIMIZATION_LEVEL_Release": "-Owholemodule",
     },
     xcconfig_by_build_setting = {
         "//Pods/cocoapods-bazel:debug": {"SWIFT_OPTIMIZATION_LEVEL": "-Onone"},
