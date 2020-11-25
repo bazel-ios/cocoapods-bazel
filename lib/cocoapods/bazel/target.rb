@@ -27,8 +27,8 @@ module Pod
 
       include XCConfigResolver
 
-      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
-      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs
+      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
+      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
 
       def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {})
         @installer = installer
@@ -39,6 +39,7 @@ module Pod
         @package_dir = installer.sandbox.pod_dir(pod_target.pod_name)
         @package = installer.sandbox.pod_dir(pod_target.pod_name).relative_path_from(installer.config.installation_root).to_s
         @default_xcconfigs = default_xcconfigs
+        @resolved_xconfig_by_config = {}
       end
 
       def bazel_label(relative_to: nil)
@@ -99,26 +100,57 @@ module Pod
       end
 
       def product_module_name
-        name = resolved_build_setting_value('PRODUCT_MODULE_NAME') || resolved_build_setting_value('PRODUCT_NAME') ||
+        name = resolved_value_by_build_setting('PRODUCT_MODULE_NAME') || resolved_value_by_build_setting('PRODUCT_NAME') ||
                if non_library_spec
                  label.tr('-', '_')
                else
                  pod_target.product_module_name
                end
 
+        raise 'The product module name must be the same for both debug and release.' unless name.is_a? String
+
         name.gsub(/^([0-9])/, '_\1').gsub(/[^a-zA-Z0-9_]/, '_')
       end
 
       def swift_objc_bridging_header
-        resolved_build_setting_value('SWIFT_OBJC_BRIDGING_HEADER')
+        resolved_value_by_build_setting('SWIFT_OBJC_BRIDGING_HEADER')
       end
 
       def uses_swift?
         file_accessors.any? { |fa| fa.source_files.any? { |s| s.extname == '.swift' } }
       end
 
-      # TODO: handle both configs
-      def pod_target_xcconfig(configuration: :debug)
+      def pod_target_xcconfig_by_build_setting
+        debug_xcconfig = resolved_xcconfig(configuration: :debug)
+        release_xcconfig = resolved_xcconfig(configuration: :release)
+        debug_only_xcconfig = debug_xcconfig.reject { |k, v| release_xcconfig[k] == v }
+        release_only_xcconfig = release_xcconfig.reject { |k, v| debug_xcconfig[k] == v }
+
+        xconfig_by_build_setting = {}
+        xconfig_by_build_setting[build_settings_label(:debug)] = debug_only_xcconfig unless debug_only_xcconfig.empty?
+        xconfig_by_build_setting[build_settings_label(:release)] = release_only_xcconfig unless release_only_xcconfig.empty?
+        xconfig_by_build_setting
+      end
+
+      def common_pod_target_xcconfig
+        debug_xcconfig = resolved_xcconfig(configuration: :debug)
+        release_xcconfig = resolved_xcconfig(configuration: :release)
+        common_xcconfig = debug_xcconfig.select { |k, v| release_xcconfig[k] == v }
+        # If the value is an array, merge it into a string.
+        common_xcconfig.map do |k, v|
+          [k, v.is_a?(Array) ? v.shelljoin : v]
+        end.to_h
+      end
+
+      def resolved_xcconfig(configuration:)
+        unless resolved_xconfig_by_config[configuration]
+          xcconfig = pod_target_xcconfig(configuration: configuration)
+          resolved_xconfig_by_config[configuration] = resolve_xcconfig(xcconfig)[1]
+        end
+        resolved_xconfig_by_config[configuration].clone
+      end
+
+      def pod_target_xcconfig(configuration:)
         pod_target
           .build_settings_for_spec(non_library_spec || pod_target.root_spec, configuration: configuration)
           .merged_pod_target_xcconfigs
@@ -131,16 +163,116 @@ module Pod
           )
       end
 
-      def resolved_build_setting_value(setting, settings: pod_target_xcconfig)
-        super(setting, settings: settings)
+      def resolved_value_by_build_setting(setting, additional_settings: {})
+        debug_settings = pod_target_xcconfig(configuration: :debug).merge(additional_settings)
+        debug_value = resolved_build_setting_value(setting, settings: debug_settings)
+        release_settings = pod_target_xcconfig(configuration: :release).merge(additional_settings)
+        release_value = resolved_build_setting_value(setting, settings: release_settings)
+        if debug_value == release_value
+          debug_value
+        else
+          value_by_build_setting = {
+            build_settings_label(:debug) => debug_value,
+            build_settings_label(:release) => release_value
+          }
+          StarlarkCompiler::AST::FunctionCall.new('select', value_by_build_setting)
+        end
       end
 
-      def pod_target_xcconfig_header_search_paths
-        resolved_build_setting_value('HEADER_SEARCH_PATHS', settings: pod_target_xcconfig.merge('PODS_TARGET_SRCROOT' => @package)) || []
+      def pod_target_xcconfig_header_search_paths(configuration)
+        settings = pod_target_xcconfig(configuration: configuration).merge('PODS_TARGET_SRCROOT' => @package)
+        resolved_build_setting_value('HEADER_SEARCH_PATHS', settings: settings) || []
       end
 
-      def pod_target_xcconfig_user_header_search_paths
-        resolved_build_setting_value('USER_HEADER_SEARCH_PATHS', settings: pod_target_xcconfig.merge('PODS_TARGET_SRCROOT' => @package)) || []
+      def pod_target_xcconfig_user_header_search_paths(configuration)
+        settings = pod_target_xcconfig(configuration: configuration).merge('PODS_TARGET_SRCROOT' => @package)
+        resolved_build_setting_value('USER_HEADER_SEARCH_PATHS', settings: settings) || []
+      end
+
+      def pod_target_copts(type)
+        setting =
+          case type
+          when :swift then 'OTHER_SWIFT_FLAGS'
+          when :objc then 'OTHER_CFLAGS'
+          else raise "#Unsupported type #{type}"
+          end
+        copts = resolved_value_by_build_setting(setting)
+        copts = [copts] if copts&.is_a?(String)
+
+        debug_copts = copts_for_search_paths_by_config(type, :debug)
+        release_copts = copts_for_search_paths_by_config(type, :release)
+        copts_for_search_paths =
+          if debug_copts.sort == release_copts.sort
+            debug_copts
+          else
+            copts_by_build_setting = {
+              build_settings_label(:debug) => debug_copts,
+              build_settings_label(:release) => release_copts
+            }
+            StarlarkCompiler::AST::FunctionCall.new('select', copts_by_build_setting)
+          end
+
+        if copts
+          if copts.is_a?(Array)
+            if copts_for_search_paths.is_a?(Array)
+              copts + copts_for_search_paths
+            else
+              starlark { copts_for_search_paths + copts }
+            end
+          elsif copts_for_search_paths.is_a?(Array) && copts_for_search_paths.empty?
+            copts
+          else
+            starlark { copts + copts_for_search_paths }
+          end
+        else
+          copts_for_search_paths
+        end
+      end
+
+      def copts_for_search_paths_by_config(type, configuration)
+        additional_flag =
+          case type
+          when :swift then '-Xcc'
+          when :objc then nil
+          else raise "#Unsupported type #{type}"
+          end
+
+        copts = []
+        pod_target_xcconfig_header_search_paths(configuration).each do |path|
+          iquote = "-I#{path}"
+          copts << additional_flag if additional_flag
+          copts << iquote
+        end
+
+        pod_target_xcconfig_user_header_search_paths(configuration).each do |path|
+          iquote = "-iquote#{path}"
+          copts << additional_flag if additional_flag
+          copts << iquote
+        end
+        copts
+      end
+
+      def pod_target_infoplists_by_build_setting
+        debug_plist = resolved_build_setting_value('INFOPLIST_FILE', settings: pod_target_xcconfig(configuration: :debug))
+        release_plist = resolved_build_setting_value('INFOPLIST_FILE', settings: pod_target_xcconfig(configuration: :release))
+        if debug_plist == release_plist
+          []
+        else
+          plist_by_build_setting = {}
+          plist_by_build_setting[build_settings_label(:debug)] = debug_plist if debug_plist
+          plist_by_build_setting[build_settings_label(:release)] = release_plist if release_plist
+          plist_by_build_setting
+        end
+      end
+
+      def common_pod_target_infoplists(additional_plist: nil)
+        debug_plist = resolved_build_setting_value('INFOPLIST_FILE', settings: pod_target_xcconfig(configuration: :debug))
+        release_plist = resolved_build_setting_value('INFOPLIST_FILE', settings: pod_target_xcconfig(configuration: :release))
+        if debug_plist == release_plist
+          [debug_plist, additional_plist].compact
+        else
+          [additional_plist].compact
+        end
       end
 
       def to_rule_kwargs
@@ -160,11 +292,13 @@ module Pod
             .add(:swift_objc_bridging_header, swift_objc_bridging_header, defaults: [nil])
 
           # xcconfigs
-          resolve_xcconfig(pod_target_xcconfig, default_xcconfigs: default_xcconfigs).tap do |name, xcconfig|
+          resolve_xcconfig(common_pod_target_xcconfig, default_xcconfigs: default_xcconfigs).tap do |name, xcconfig|
             args
               .add(:default_xcconfig_name, name, defaults: [nil])
               .add(:xcconfig, xcconfig, defaults: [{}])
           end
+          # xcconfig_by_build_setting
+          args.add(:xcconfig_by_build_setting, pod_target_xcconfig_by_build_setting, defaults: [{}])
         end.kwargs
 
         file_accessors.group_by { |fa| fa.spec_consumer.requires_arc.class }.tap do |fa_by_arc|
@@ -222,26 +356,14 @@ module Pod
         end
 
         # non-propagated stuff
-        kwargs[:swift_copts] = resolved_build_setting_value('OTHER_SWIFT_FLAGS') || []
-        kwargs[:objc_copts] = resolved_build_setting_value('OTHER_CFLAGS') || []
-        kwargs[:linkopts] = resolved_build_setting_value('OTHER_LDFLAGS') || []
-        # kwargs[:cc_copts] = resolved_build_setting_value('${OTHER_CFLAGS} ${OTHER_CPPFLAGS}') || []
-
-        pod_target_xcconfig_header_search_paths.each do |path|
-          iquote = "-I#{path}"
-          kwargs[:objc_copts] << iquote
-          kwargs[:swift_copts] << '-Xcc' << iquote
-        end
-
-        pod_target_xcconfig_user_header_search_paths.each do |path|
-          i = "-iquote#{path}"
-          kwargs[:objc_copts] << i
-          kwargs[:swift_copts] << '-Xcc' << i
-        end
+        kwargs[:swift_copts] = pod_target_copts(:swift)
+        kwargs[:objc_copts] = pod_target_copts(:objc)
+        linkopts = resolved_value_by_build_setting('OTHER_LDFLAGS')
+        linkopts = [linkopts] if linkopts.is_a? String
+        kwargs[:linkopts] = linkopts || []
 
         # propagated
         kwargs[:defines] = []
-        kwargs[:linkopts] = []
         kwargs[:other_inputs] = []
         kwargs[:linking_style] = nil
         kwargs[:runtime_deps] = []
@@ -298,6 +420,7 @@ module Pod
 
           bundle_id: nil,
           env: {},
+          infoplists_by_build_setting: [],
           infoplists: [],
           minimum_os_version: nil,
           test_host: nil,
@@ -420,9 +543,10 @@ module Pod
 
       def test_kwargs
         {
-          bundle_id: resolved_build_setting_value('PRODUCT_BUNDLE_IDENTIFIER'),
+          bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER'),
           env: pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {}),
-          infoplists: [resolved_build_setting_value('INFOPLIST_FILE')].compact,
+          infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
+          infoplists: common_pod_target_infoplists,
           minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
           test_host: test_host&.bazel_label(relative_to: package) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
         }
@@ -431,21 +555,18 @@ module Pod
       def app_kwargs
         {
           app_icons: [],
-          bundle_id: resolved_build_setting_value('PRODUCT_BUNDLE_IDENTIFIER') || "org.cocoapods.#{label}",
+          bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER') || "org.cocoapods.#{label}",
           bundle_name: nil,
-          entitlements: resolved_build_setting_value('CODE_SIGN_ENTITLEMENTS'),
+          entitlements: resolved_value_by_build_setting('CODE_SIGN_ENTITLEMENTS'),
           entitlements_validation: nil,
           extensions: [],
           families: %w[iphone ipad],
           frameworks: [],
-          infoplists: [
-            resolved_build_setting_value('INFOPLIST_FILE'),
-            nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)
-          ].compact,
+          infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
+          infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)),
           ipa_post_processor: nil,
           launch_images: [],
           launch_storyboard: nil,
-          linkopts: [],
           minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
           provisioning_profile: nil,
           resources: [],

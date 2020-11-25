@@ -40,8 +40,32 @@ ios_application(
         "iphone",
         "ipad",
     ],
+    linkopts = ["-all_load"],
     minimum_os_version = "10.0",
     module_name = "A_App",
+    objc_copts = [
+        "-Wno-conversion",
+        "-Wno-error=at-protocol",
+        "-I/Headers/Private",
+    ],
+    swift_copts = [
+        "-DDEBUG",
+        "-Xcc",
+        "-I/Headers/Private",
+    ],
     swift_version = "5.2",
+    xcconfig = {
+        "ARCHS": [
+            "arm64",
+            "x86",
+        ],
+        "VERSIONING_SYSTEM": "apple-generic",
+        "SWIFT_OPTIMIZATION_LEVEL_Debug": "-Onone",
+        "SWIFT_OPTIMIZATION_LEVEL_Release": "-Owholemodule",
+    },
+    xcconfig_by_build_setting = {
+        "//Pods/cocoapods-bazel:debug": {"SWIFT_OPTIMIZATION_LEVEL": "-Onone"},
+        "//Pods/cocoapods-bazel:release": {"SWIFT_OPTIMIZATION_LEVEL": "-Owholemodule"},
+    },
     deps = [":A"],
 )
