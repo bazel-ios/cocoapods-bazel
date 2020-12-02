@@ -355,12 +355,14 @@ module Pod
           end.to_h
         end
 
-        # non-propagated stuff
-        kwargs[:swift_copts] = pod_target_copts(:swift)
-        kwargs[:objc_copts] = pod_target_copts(:objc)
-        linkopts = resolved_value_by_build_setting('OTHER_LDFLAGS')
-        linkopts = [linkopts] if linkopts.is_a? String
-        kwargs[:linkopts] = linkopts || []
+        # non-propagated stuff for a target that should build.
+        if pod_target.should_build?
+          kwargs[:swift_copts] = pod_target_copts(:swift)
+          kwargs[:objc_copts] = pod_target_copts(:objc)
+          linkopts = resolved_value_by_build_setting('OTHER_LDFLAGS')
+          linkopts = [linkopts] if linkopts.is_a? String
+          kwargs[:linkopts] = linkopts || []
+        end
 
         # propagated
         kwargs[:defines] = []
