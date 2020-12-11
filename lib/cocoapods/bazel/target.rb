@@ -259,8 +259,8 @@ module Pod
           []
         else
           plist_by_build_setting = {}
-          plist_by_build_setting[build_settings_label(:debug)] = debug_plist if debug_plist
-          plist_by_build_setting[build_settings_label(:release)] = release_plist if release_plist
+          plist_by_build_setting[build_settings_label(:debug)] = [debug_plist] if debug_plist
+          plist_by_build_setting[build_settings_label(:release)] = [release_plist] if release_plist
           plist_by_build_setting
         end
       end

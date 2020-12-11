@@ -61,8 +61,8 @@ ios_application(
         "ipad",
     ],
     infoplists_by_build_setting = {
-        "//Pods/cocoapods-bazel:debug": "Resources/debug.plist",
-        "//Pods/cocoapods-bazel:release": "Resources/release.plist",
+        "//Pods/cocoapods-bazel:debug": ["Resources/debug.plist"],
+        "//Pods/cocoapods-bazel:release": ["Resources/release.plist"],
     },
     minimum_os_version = "10.0",
     module_name = "B_App",
