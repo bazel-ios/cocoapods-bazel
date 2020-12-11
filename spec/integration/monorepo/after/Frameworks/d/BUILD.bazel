@@ -44,12 +44,10 @@ ios_application(
         "App/**/*.swift",
     ]),
     bundle_id = "org.cocoapods.D-App",
-    families = [
-        "iphone",
-        "ipad",
-    ],
+    families = ["ipad"],
     minimum_os_version = "10.0",
     module_name = "D_App",
     swift_version = "5.2",
+    xcconfig = {"TARGETED_DEVICE_FAMILY": "2"},
     deps = [":D"],
 )
