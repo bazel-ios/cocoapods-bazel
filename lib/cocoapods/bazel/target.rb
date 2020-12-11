@@ -562,7 +562,7 @@ module Pod
           entitlements: resolved_value_by_build_setting('CODE_SIGN_ENTITLEMENTS'),
           entitlements_validation: nil,
           extensions: [],
-          families: %w[iphone ipad],
+          families: app_targeted_device_families,
           frameworks: [],
           infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
           infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)),
@@ -577,6 +577,20 @@ module Pod
           version: [],
           watch_application: []
         }
+      end
+
+      def app_targeted_device_families
+        # Reads the targeted device families from xconfig TARGETED_DEVICE_FAMILY. Supports both iphone and ipad by default.
+        device_families = resolved_value_by_build_setting('TARGETED_DEVICE_FAMILY') || '1,2'
+        raise 'TARGETED_DEVICE_FAMILY must be the same for both debug and release.' unless device_families.is_a? String
+
+        device_families.split(',').map do |device_family|
+          case device_family
+          when '1' then 'iphone'
+          when '2' then 'ipad'
+          else raise "Unsupported device family: #{device_family}"
+          end
+        end
       end
 
       def nil_if_empty(arr)
