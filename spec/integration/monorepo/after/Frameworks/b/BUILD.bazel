@@ -117,8 +117,8 @@ ios_application(
         "App/**/*.swift",
     ]),
     bundle_id = select({
-        "//Pods/cocoapods-bazel:debug": "org.cocoapods.B-App.Debug",
-        "//Pods/cocoapods-bazel:release": "",
+        "//Pods/cocoapods-bazel:debug": "org.cocoapods.B-DebuggableOnlyApp.Debug",
+        "//Pods/cocoapods-bazel:release": "org.cocoapods.B-DebuggableOnlyApp",
     }),
     entitlements = select({
         "//Pods/cocoapods-bazel:debug": "Resources/debug.entitlements",
@@ -133,10 +133,10 @@ ios_application(
         "//Pods/cocoapods-bazel:release": ["Resources/release.plist"],
     },
     minimum_os_version = "10.0",
-    module_name = "B_App",
+    module_name = "B_DebuggableOnlyApp",
     objc_copts = select({
         "//Pods/cocoapods-bazel:debug": ["-I/Headers/Private/Debug"],
-        "//Pods/cocoapods-bazel:release": [],
+        "//Pods/cocoapods-bazel:release": ["-I/Headers/Private/Release"],
     }) + [
         "-Wno-conversion",
         "-Wno-error=at-protocol",
@@ -158,20 +158,18 @@ ios_application(
         "INFOPLIST_FILE_Debug": "Resources/debug.plist",
         "INFOPLIST_FILE_Release": "Resources/release.plist",
         "CODE_SIGN_ENTITLEMENTS_Debug": "Resources/debug.entitlements",
-        "CODE_SIGN_ENTITLEMENTS_Release": "Resources/release.entitlements",
-        "PRODUCT_BUNDLE_IDENTIFIER_Debug": "org.cocoapods.B-App.Debug",
-        "PRODUCT_BUNDLE_IDENTIFIER_Release": "org.cocoapods.B-App",
+        "PRODUCT_BUNDLE_IDENTIFIER_Debug": "org.cocoapods.B-DebuggableOnlyApp.Debug",
+        "PRODUCT_BUNDLE_IDENTIFIER_Release": "org.cocoapods.B-DebuggableOnlyApp",
     },
     xcconfig_by_build_setting = {
         "//Pods/cocoapods-bazel:debug": {
             "INFOPLIST_FILE": "Resources/debug.plist",
             "CODE_SIGN_ENTITLEMENTS": "Resources/debug.entitlements",
-            "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-App.Debug",
+            "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-DebuggableOnlyApp.Debug",
         },
         "//Pods/cocoapods-bazel:release": {
             "INFOPLIST_FILE": "Resources/release.plist",
-            "CODE_SIGN_ENTITLEMENTS": "Resources/release.entitlements",
-            "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-App",
+            "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-DebuggableOnlyApp",
         },
     },
     deps = [":B"],
