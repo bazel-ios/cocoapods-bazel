@@ -173,7 +173,7 @@ module Pod
         else
           value_by_build_setting = {
             build_settings_label(:debug) => debug_value.empty? && is_label_argument ? nil : debug_value,
-            build_settings_label(:release) => release_value.empty? && is_label_argument ? nil : release_value,
+            build_settings_label(:release) => release_value.empty? && is_label_argument ? nil : release_value
           }
           StarlarkCompiler::AST::FunctionCall.new('select', value_by_build_setting)
         end
