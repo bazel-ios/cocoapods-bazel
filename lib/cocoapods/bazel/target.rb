@@ -163,17 +163,17 @@ module Pod
           )
       end
 
-      def resolved_value_by_build_setting(setting, additional_settings: {})
+      def resolved_value_by_build_setting(setting, additional_settings: {}, is_label_argument: false)
         debug_settings = pod_target_xcconfig(configuration: :debug).merge(additional_settings)
         debug_value = resolved_build_setting_value(setting, settings: debug_settings)
         release_settings = pod_target_xcconfig(configuration: :release).merge(additional_settings)
         release_value = resolved_build_setting_value(setting, settings: release_settings)
         if debug_value == release_value
-          debug_value
+          debug_value&.empty? && is_label_argument ? nil : debug_value
         else
           value_by_build_setting = {
-            build_settings_label(:debug) => debug_value,
-            build_settings_label(:release) => release_value
+            build_settings_label(:debug) => debug_value.empty? && is_label_argument ? nil : debug_value,
+            build_settings_label(:release) => release_value.empty? && is_label_argument ? nil : release_value
           }
           StarlarkCompiler::AST::FunctionCall.new('select', value_by_build_setting)
         end
@@ -555,11 +555,12 @@ module Pod
       end
 
       def app_kwargs
+        # maps to kwargs listed for https://github.com/bazelbuild/rules_apple/blob/master/doc/rules-ios.md#ios_application
         {
           app_icons: [],
           bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER') || "org.cocoapods.#{label}",
           bundle_name: nil,
-          entitlements: resolved_value_by_build_setting('CODE_SIGN_ENTITLEMENTS'),
+          entitlements: resolved_value_by_build_setting('CODE_SIGN_ENTITLEMENTS', is_label_argument: true),
           entitlements_validation: nil,
           extensions: [],
           families: app_targeted_device_families,

@@ -108,3 +108,69 @@ ios_application(
     },
     deps = [":B"],
 )
+
+ios_application(
+    name = "B-DebuggableOnlyApp",
+    srcs = glob([
+        "App/**/*.h",
+        "App/**/*.m",
+        "App/**/*.swift",
+    ]),
+    bundle_id = select({
+        "//Pods/cocoapods-bazel:debug": "org.cocoapods.B-DebuggableOnlyApp.Debug",
+        "//Pods/cocoapods-bazel:release": "org.cocoapods.B-DebuggableOnlyApp",
+    }),
+    entitlements = select({
+        "//Pods/cocoapods-bazel:debug": "Resources/debug.entitlements",
+        "//Pods/cocoapods-bazel:release": None,
+    }),
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    infoplists_by_build_setting = {
+        "//Pods/cocoapods-bazel:debug": ["Resources/debug.plist"],
+        "//Pods/cocoapods-bazel:release": ["Resources/release.plist"],
+    },
+    minimum_os_version = "10.0",
+    module_name = "B_DebuggableOnlyApp",
+    objc_copts = select({
+        "//Pods/cocoapods-bazel:debug": ["-I/Headers/Private/Debug"],
+        "//Pods/cocoapods-bazel:release": ["-I/Headers/Private/Release"],
+    }) + [
+        "-Wno-conversion",
+        "-Wno-error=at-protocol",
+    ],
+    swift_copts = select({
+        "//Pods/cocoapods-bazel:debug": [
+            "-Xcc",
+            "-I/Headers/Private/Debug",
+        ],
+        "//Pods/cocoapods-bazel:release": [
+            "-Xcc",
+            "-I/Headers/Private/Release",
+        ],
+    }),
+    swift_version = "5.2",
+    xcconfig = {
+        "HEADER_SEARCH_PATHS_Debug": "/Headers/Private/Debug",
+        "HEADER_SEARCH_PATHS_Release": "/Headers/Private/Release",
+        "INFOPLIST_FILE_Debug": "Resources/debug.plist",
+        "INFOPLIST_FILE_Release": "Resources/release.plist",
+        "CODE_SIGN_ENTITLEMENTS_Debug": "Resources/debug.entitlements",
+        "PRODUCT_BUNDLE_IDENTIFIER_Debug": "org.cocoapods.B-DebuggableOnlyApp.Debug",
+        "PRODUCT_BUNDLE_IDENTIFIER_Release": "org.cocoapods.B-DebuggableOnlyApp",
+    },
+    xcconfig_by_build_setting = {
+        "//Pods/cocoapods-bazel:debug": {
+            "INFOPLIST_FILE": "Resources/debug.plist",
+            "CODE_SIGN_ENTITLEMENTS": "Resources/debug.entitlements",
+            "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-DebuggableOnlyApp.Debug",
+        },
+        "//Pods/cocoapods-bazel:release": {
+            "INFOPLIST_FILE": "Resources/release.plist",
+            "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-DebuggableOnlyApp",
+        },
+    },
+    deps = [":B"],
+)
