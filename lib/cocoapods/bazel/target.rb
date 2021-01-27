@@ -169,7 +169,7 @@ module Pod
         release_settings = pod_target_xcconfig(configuration: :release).merge(additional_settings)
         release_value = resolved_build_setting_value(setting, settings: release_settings)
         if debug_value == release_value
-          debug_value
+          (debug_value && debug_value.empty? && is_label_argument) ? nil : debug_value
         else
           value_by_build_setting = {
             build_settings_label(:debug) => debug_value.empty? && is_label_argument ? nil : debug_value,
