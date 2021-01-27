@@ -44,4 +44,25 @@ Pod::Spec.new do |s|
       'PRODUCT_BUNDLE_IDENTIFIER_Release' => 'org.cocoapods.B-App'
     }
   end
+
+
+  s.app_spec 'DebuggableOnlyApp' do |as|
+    as.source_files = 'App/**/*.{h,m,swift}'
+    as.pod_target_xcconfig = {
+      'HEADER_SEARCH_PATHS' => '$(HEADER_SEARCH_PATHS_$(CONFIGURATION))',
+      'HEADER_SEARCH_PATHS_Debug' => '${PODS_ROOT}/Headers/Private/Debug',
+      'INFOPLIST_FILE' => '$(INFOPLIST_FILE_$(CONFIGURATION))',
+      'INFOPLIST_FILE_Debug' => 'Resources/debug.plist',
+      
+      # in the docs for ios_application, at least one file must be specified for infoplists
+      # https://github.com/bazelbuild/rules_apple/blob/master/doc/rules-ios.md#ios_application
+      'INFOPLIST_FILE_Release' => 'Resources/release.plist',
+      
+      'OTHER_CFLAGS' => '-Wno-conversion -Wno-error=at-protocol',
+      'CODE_SIGN_ENTITLEMENTS' => '$(CODE_SIGN_ENTITLEMENTS_$(CONFIGURATION))',
+      'CODE_SIGN_ENTITLEMENTS_Debug' => '$(PODS_TARGET_SRCROOT)/Resources/debug.entitlements',
+      'PRODUCT_BUNDLE_IDENTIFIER' => '$(PRODUCT_BUNDLE_IDENTIFIER_$(CONFIGURATION))',
+      'PRODUCT_BUNDLE_IDENTIFIER_Debug' => 'org.cocoapods.B-App.Debug',
+    }
+  end  
 end
