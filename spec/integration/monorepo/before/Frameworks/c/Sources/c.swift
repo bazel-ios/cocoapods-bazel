@@ -1,1 +1,2 @@
 // c Swift
+import OTPublishersHeadlessSDK

@@ -16,6 +16,7 @@ apple_framework(
     deps = [
         "//Frameworks/a:A",
         "//Frameworks/b:B",
+        "//Pods/OneTrust-CMP-XCFramework",
     ],
 )
 

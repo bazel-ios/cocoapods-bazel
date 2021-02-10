@@ -17,6 +17,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'A', '1.0.0.LOCAL'
   s.dependency 'B'
+  s.dependency 'OneTrust-CMP-XCFramework'
 
   s.test_spec 'Tests' do |ts|
     ts.source_files = 'Tests/**/*.{h,m,swift}'
