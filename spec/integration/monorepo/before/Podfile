@@ -14,7 +14,7 @@ install! 'cocoapods',
 all_podspecs = Dir['**/*.podspec', base: __dir__] - %w[Frameworks/e/E.podspec]
 
 target 'App' do
-  platform :ios, '9.0'
+  platform :ios, '11.0'
 
   all_podspecs.each do |podspec|
     spec = Pod::Specification.from_file(File.join(__dir__, podspec))

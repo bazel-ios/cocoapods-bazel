@@ -9,7 +9,7 @@ apple_framework(
         "Sources/**/*.m",
         "Sources/**/*.swift",
     ]),
-    platforms = {"ios": "10.0"},
+    platforms = {"ios": "11.0"},
     private_headers = glob(["Sources/Internal/**/*.h"]),
     swift_version = "5.2",
     visibility = ["//visibility:public"],
@@ -27,7 +27,7 @@ ios_unit_test(
         "//Pods/cocoapods-bazel:debug": "org.cocoapods.B-Test.Debug",
         "//Pods/cocoapods-bazel:release": "org.cocoapods.B-Test",
     }),
-    minimum_os_version = "10.0",
+    minimum_os_version = "11.0",
     module_name = "B_Unit_Tests",
     swift_version = "5.2",
     xcconfig = {
@@ -64,7 +64,7 @@ ios_application(
         "//Pods/cocoapods-bazel:debug": ["Resources/debug.plist"],
         "//Pods/cocoapods-bazel:release": ["Resources/release.plist"],
     },
-    minimum_os_version = "10.0",
+    minimum_os_version = "11.0",
     module_name = "B_App",
     objc_copts = select({
         "//Pods/cocoapods-bazel:debug": ["-I/Headers/Private/Debug"],
@@ -132,7 +132,7 @@ ios_application(
         "//Pods/cocoapods-bazel:debug": ["Resources/debug.plist"],
         "//Pods/cocoapods-bazel:release": ["Resources/release.plist"],
     },
-    minimum_os_version = "10.0",
+    minimum_os_version = "11.0",
     module_name = "B_DebuggableOnlyApp",
     objc_copts = select({
         "//Pods/cocoapods-bazel:debug": ["-I/Headers/Private/Debug"],
