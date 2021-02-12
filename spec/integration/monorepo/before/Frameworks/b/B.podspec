@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.source = { git: 'https://github.com/Square/cocoapods-generate' }
   s.summary = 'Testing pod'
 
-  s.ios.deployment_target = '10.0'
+  s.ios.deployment_target = '11.0'
   s.swift_versions = %w[5.2]
 
   s.source_files = 'Sources/**/*.{h,m,swift}'

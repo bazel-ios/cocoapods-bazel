@@ -378,6 +378,7 @@ module Pod
         kwargs[:vendored_dynamic_frameworks] = glob(attr: :vendored_dynamic_frameworks, return_files: true)
         kwargs[:vendored_static_libraries] = glob(attr: :vendored_static_libraries, return_files: true)
         kwargs[:vendored_dynamic_libraries] = glob(attr: :vendored_dynamic_libraries, return_files: true)
+        kwargs[:vendored_xcframeworks] = vendored_xcframeworks
 
         # any compatible provider: CCProvider, SwiftInfo, etc
         kwargs[:deps] = deps_by_config
@@ -448,6 +449,7 @@ module Pod
           vendored_dynamic_frameworks: [],
           vendored_static_libraries: [],
           vendored_dynamic_libraries: [],
+          vendored_xcframeworks: [],
 
           deps: []
         }
@@ -591,6 +593,24 @@ module Pod
           when '2' then 'ipad'
           else raise "Unsupported device family: #{device_family}"
           end
+        end
+      end
+
+      def vendored_xcframeworks
+        pod_target.xcframeworks.values.flatten(1).uniq.map do |xcframework|
+          {
+            'name' => xcframework.name,
+            'slices' => xcframework.slices.map do |slice|
+              {
+                'identifier' => slice.identifier,
+                'platform' => slice.platform.name.to_s,
+                'platform_variant' => slice.platform_variant.to_s,
+                'supported_archs' => slice.supported_archs,
+                'path' => slice.path.relative_path_from(@package_dir).to_s,
+                'build_type' => { 'linkage' => slice.build_type.linkage.to_s, 'packaging' => slice.build_type.packaging.to_s }
+              }
+            end
+          }
         end
       end
 
