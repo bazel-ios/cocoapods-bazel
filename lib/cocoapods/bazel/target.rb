@@ -550,7 +550,7 @@ module Pod
           bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER'),
           env: pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {}),
           infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
-          infoplists: common_pod_target_infoplists,
+          infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)),
           minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
           test_host: test_host&.bazel_label(relative_to: package) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
         }

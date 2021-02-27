@@ -27,9 +27,16 @@ ios_unit_test(
         "Tests/**/*.m",
         "Tests/**/*.swift",
     ]),
+    infoplists = [
+        {
+            "COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY": True,
+            "COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY_2": "KEY_2",
+        },
+    ],
     minimum_os_version = "11.0",
     module_name = "D_Unit_Tests",
     swift_version = "5.2",
+    test_host = ":D-App",
     deps = [
         ":D",
         "//Frameworks/e:E",
@@ -45,6 +52,12 @@ ios_application(
     ]),
     bundle_id = "org.cocoapods.D-App",
     families = ["ipad"],
+    infoplists = [
+        {
+            "COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY": True,
+            "COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY_2": "KEY_2",
+        },
+    ],
     minimum_os_version = "11.0",
     module_name = "D_App",
     swift_version = "5.2",
