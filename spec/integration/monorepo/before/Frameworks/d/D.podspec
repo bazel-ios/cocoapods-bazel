@@ -20,14 +20,28 @@ Pod::Spec.new do |s|
   s.dependency 'Public'
 
   s.test_spec 'Tests' do |ts|
+    ts.requires_app_host = true
+    ts.app_host_name = 'D/App'
+    ts.dependency 'D/App'
+
     ts.source_files = 'Tests/**/*.{h,m,swift}'
 
     ts.dependency 'E'
+
+    ts.info_plist = {
+      'COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY' => true,
+      'COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY_2' => 'KEY_2',
+    }
   end
 
   s.app_spec 'App' do |as|
     as.source_files = 'App/**/*.{h,m,swift}'
 
     as.pod_target_xcconfig = { 'TARGETED_DEVICE_FAMILY' => '2' }
+
+    as.info_plist = {
+      'COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY' => true,
+      'COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY_2' => 'KEY_2',
+    }
   end
 end
