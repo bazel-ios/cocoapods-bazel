@@ -521,9 +521,13 @@ module Pod
             expand_glob("#{m.pre_match}#{alt}#{m.post_match}")
           end.uniq
         elsif extensions && File.extname(glob).empty?
-          extensions.map do |ext|
-            glob.chomp!('**/*') # If we reach here and the glob ends with **/*, we need to avoid duplicating it (we do not want to end up with **/*/**/*)
-            File.join(glob, '**', "*.#{ext}")
+          glob = glob.chomp('**/*') # If we reach here and the glob ends with **/*, we need to avoid duplicating it (we do not want to end up with **/*/**/*)
+          if File.basename(glob) == '*'
+            extensions.map { |ext| "#{glob}.#{ext}" }
+          else
+            extensions.map do |ext|
+              File.join(glob, '**', "*.#{ext}")
+            end
           end
         elsif expand_directories
           if glob.end_with?('/**/*')
