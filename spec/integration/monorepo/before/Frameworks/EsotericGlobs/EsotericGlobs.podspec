@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
     s.source_files = 'Sources/**/*.{h,m,swift}'
     s.private_header_files = 'Sources/Internal/**/*.h'
 
-    s.source_files = "Sources/**/*.[mh]"
+    s.source_files = "Sources/**/*.[mh]", "SourcesThatDontExist/*"
     s.public_header_files = "Sources/Public/*.h"
     s.private_header_files = "Sources/Private/*.h"
 
