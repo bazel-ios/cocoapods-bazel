@@ -22,6 +22,15 @@ module Pod
         build_files = Hash.new { |h, k| h[k] = StarlarkCompiler::BuildFile.new(workspace: workspace, package: k) }
         installer.pod_targets.each do |pod_target|
           package = sandbox.pod_dir(pod_target.pod_name).relative_path_from(workspace).to_s
+          if package.start_with?('..')
+            raise Informative, <<~MSG
+              Bazel does not support Pod located outside of current workspace: \"#{package}\".
+              To fix this, you can move the Pod into workspace,
+              or you can symlink the Pod inside the workspace by running `ln -s <path_to_pod> .` at workspace root
+              Then change path declared in Podfile to `./<pod_name>`
+              Current workspace: #{workspace}
+            MSG
+          end
           build_file = build_files[package]
 
           bazel_targets = [Target.new(installer, pod_target, nil, default_xcconfigs)] +
