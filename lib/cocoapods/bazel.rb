@@ -31,6 +31,7 @@ module Pod
               Current workspace: #{workspace}
             MSG
           end
+
           build_file = build_files[package]
 
           bazel_targets = [Target.new(installer, pod_target, nil, default_xcconfigs)] +
