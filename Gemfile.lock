@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cocoapods-bazel (0.1.0)
+    cocoapods-bazel (0.1.1)
       starlark_compiler (~> 0.3)
 
 GEM
