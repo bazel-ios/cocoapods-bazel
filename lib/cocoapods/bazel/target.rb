@@ -575,7 +575,7 @@ module Pod
           clang_build_os_version = version_number if version_number
         end
 
-        puts "warning: had different os versions" if swift_deployment_target != clang_build_os_version
+        puts 'warning: had different os versions' if swift_deployment_target != clang_build_os_version
         build_os_version = swift_deployment_target || clang_build_os_version
         platform_target = pod_target.deployment_target_for_non_library_spec(non_library_spec)
 
