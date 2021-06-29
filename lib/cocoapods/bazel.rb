@@ -19,6 +19,10 @@ module Pod
       UI.titled_section 'Generating Bazel files' do
         workspace = installer.config.installation_root
         sandbox = installer.sandbox
+
+        # Ensure we declare the sandbox (Pods/) as a package so each Pod (as a package) belongs to sandbox root package instead
+        FileUtils.touch(File.join(installer.config.sandbox_root, 'BUILD.bazel'))
+
         build_files = Hash.new { |h, k| h[k] = StarlarkCompiler::BuildFile.new(workspace: workspace, package: k) }
         installer.pod_targets.each do |pod_target|
           package = sandbox.pod_dir(pod_target.pod_name).relative_path_from(workspace).to_s
