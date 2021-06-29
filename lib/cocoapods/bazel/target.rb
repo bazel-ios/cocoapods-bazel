@@ -545,7 +545,7 @@ module Pod
       def framework_kwargs
         {
           visibility: ['//visibility:public'],
-          platforms: { pod_target.platform.string_name.downcase => pod_target.platform.deployment_target.to_s }
+          platforms: { pod_target.platform.string_name.downcase => build_os_version || pod_target.platform.deployment_target.to_s }
         }
       end
 
@@ -555,14 +555,12 @@ module Pod
           env: pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {}),
           infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
           infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)),
-          minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
+          minimum_os_version: build_os_version || pod_target.deployment_target_for_non_library_spec(non_library_spec),
           test_host: test_host&.bazel_label(relative_to: package) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
         }
       end
 
-      def app_kwargs
-        # maps to kwargs listed for https://github.com/bazelbuild/rules_apple/blob/master/doc/rules-ios.md#ios_application
-
+      def build_os_version
         # If there's a SWIFT_DEPLOYMENT_TARGET version set, use that for the
         # minimum version. It's not currently supported or desirable in rules_ios to have
         # these distinct, however xcconfig supports that.
@@ -574,9 +572,12 @@ module Pod
           version_number = llvm_target_triple_os_version.match(/\d.*/)
           clang_build_os_version = version_number if version_number
         end
+        swift_deployment_target || clang_build_os_version
+      end
 
-        puts 'warning: had different os versions' if swift_deployment_target != clang_build_os_version
-        build_os_version = swift_deployment_target || clang_build_os_version
+      def app_kwargs
+        # maps to kwargs listed for https://github.com/bazelbuild/rules_apple/blob/master/doc/rules-ios.md#ios_application
+
         platform_target = pod_target.deployment_target_for_non_library_spec(non_library_spec)
 
         kwargs = {
