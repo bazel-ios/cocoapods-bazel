@@ -562,7 +562,24 @@ module Pod
 
       def app_kwargs
         # maps to kwargs listed for https://github.com/bazelbuild/rules_apple/blob/master/doc/rules-ios.md#ios_application
-        {
+
+        # If there's a SWIFT_DEPLOYMENT_TARGET version set, use that for the
+        # minimum version. It's not currently supported or desirable in rules_ios to have
+        # these distinct, however xcconfig supports that.
+        swift_deployment_target = resolved_value_by_build_setting('SWIFT_DEPLOYMENT_TARGET')
+
+        llvm_target_triple_os_version = resolved_value_by_build_setting('LLVM_TARGET_TRIPLE_OS_VERSION')
+        if llvm_target_triple_os_version
+          # For clang this is set ios9.0: take everything after the os name
+          version_number = llvm_target_triple_os_version.match(/\d.*/)
+          clang_build_os_version = version_number if version_number
+        end
+
+        puts "warning: had different os versions" if swift_deployment_target != clang_build_os_version
+        build_os_version = swift_deployment_target || clang_build_os_version
+        platform_target = pod_target.deployment_target_for_non_library_spec(non_library_spec)
+
+        kwargs = {
           app_icons: [],
           bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER') || "org.cocoapods.#{label}",
           bundle_name: nil,
@@ -576,7 +593,7 @@ module Pod
           ipa_post_processor: nil,
           launch_images: [],
           launch_storyboard: nil,
-          minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
+          minimum_os_version: build_os_version || platform_target,
           provisioning_profile: nil,
           resources: [],
           settings_bundle: [],
@@ -584,6 +601,10 @@ module Pod
           version: [],
           watch_application: []
         }
+
+        # If the user has set a different build os set that here
+        kwargs[:minimum_deployment_os_version] = platform_target if build_os_version
+        kwargs
       end
 
       def app_targeted_device_families

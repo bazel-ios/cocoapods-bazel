@@ -37,7 +37,11 @@ Pod::Spec.new do |s|
   s.app_spec 'App' do |as|
     as.source_files = 'App/**/*.{h,m,swift}'
 
-    as.pod_target_xcconfig = { 'TARGETED_DEVICE_FAMILY' => '2' }
+    as.pod_target_xcconfig = {
+      'TARGETED_DEVICE_FAMILY' => '2',
+      "SWIFT_PLATFORM_TARGET_PREFIX" => "ios",
+      "SWIFT_DEPLOYMENT_TARGET" => "9.0"
+    }
 
     as.info_plist = {
       'COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY' => true,
