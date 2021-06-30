@@ -545,7 +545,7 @@ module Pod
       def framework_kwargs
         {
           visibility: ['//visibility:public'],
-          platforms: { pod_target.platform.string_name.downcase => pod_target.platform.deployment_target.to_s }
+          platforms: { pod_target.platform.string_name.downcase => build_os_version || pod_target.platform.deployment_target.to_s }
         }
       end
 
@@ -555,14 +555,35 @@ module Pod
           env: pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {}),
           infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
           infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)),
-          minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
+          minimum_os_version: build_os_version || pod_target.deployment_target_for_non_library_spec(non_library_spec),
           test_host: test_host&.bazel_label(relative_to: package) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
         }
       end
 
+      def build_os_version
+        # If there's a SWIFT_DEPLOYMENT_TARGET version set, use that for the
+        # minimum version. It's not currently supported or desirable in rules_ios to have
+        # these distinct, however xcconfig supports that.
+        swift_deployment_target = resolved_value_by_build_setting('SWIFT_DEPLOYMENT_TARGET')
+
+        llvm_target_triple_os_version = resolved_value_by_build_setting('LLVM_TARGET_TRIPLE_OS_VERSION')
+        if llvm_target_triple_os_version
+          # For clang this is set ios9.0: take everything after the os name
+          version_number = llvm_target_triple_os_version.match(/\d.*/)
+          clang_build_os_version = version_number.to_s if version_number
+        end
+        if !swift_deployment_target.nil? && !clang_build_os_version.nil?
+          raise "warning: had different os versions #{swift_deployment_target} #{clang_build_os_version}" if swift_deployment_target != clang_build_os_version
+        end
+        swift_deployment_target || clang_build_os_version
+      end
+
       def app_kwargs
         # maps to kwargs listed for https://github.com/bazelbuild/rules_apple/blob/master/doc/rules-ios.md#ios_application
-        {
+
+        platform_target = pod_target.deployment_target_for_non_library_spec(non_library_spec)
+
+        kwargs = {
           app_icons: [],
           bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER') || "org.cocoapods.#{label}",
           bundle_name: nil,
@@ -576,7 +597,7 @@ module Pod
           ipa_post_processor: nil,
           launch_images: [],
           launch_storyboard: nil,
-          minimum_os_version: pod_target.deployment_target_for_non_library_spec(non_library_spec),
+          minimum_os_version: build_os_version || platform_target,
           provisioning_profile: nil,
           resources: [],
           settings_bundle: [],
@@ -584,6 +605,10 @@ module Pod
           version: [],
           watch_application: []
         }
+
+        # If the user has set a different build os set that here
+        kwargs[:minimum_deployment_os_version] = platform_target if build_os_version
+        kwargs
       end
 
       def app_targeted_device_families
