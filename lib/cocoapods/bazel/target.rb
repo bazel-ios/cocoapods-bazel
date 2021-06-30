@@ -570,7 +570,10 @@ module Pod
         if llvm_target_triple_os_version
           # For clang this is set ios9.0: take everything after the os name
           version_number = llvm_target_triple_os_version.match(/\d.*/)
-          clang_build_os_version = version_number if version_number
+          clang_build_os_version = version_number.to_s if version_number
+        end
+        if !swift_deployment_target.nil? && !clang_build_os_version.nil?
+          raise "warning: had different os versions #{swift_deployment_target} #{clang_build_os_version}" if swift_deployment_target != clang_build_os_version
         end
         swift_deployment_target || clang_build_os_version
       end

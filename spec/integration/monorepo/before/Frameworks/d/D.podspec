@@ -39,8 +39,9 @@ Pod::Spec.new do |s|
 
     as.pod_target_xcconfig = {
       'TARGETED_DEVICE_FAMILY' => '2',
-      "SWIFT_PLATFORM_TARGET_PREFIX" => "ios",
-      "SWIFT_DEPLOYMENT_TARGET" => "9.0"
+      'SWIFT_PLATFORM_TARGET_PREFIX' => 'ios',
+      'SWIFT_DEPLOYMENT_TARGET' => '9.0',
+      'LLVM_TARGET_TRIPLE_OS_VERSION' => 'ios9.0'
     }
 
     as.info_plist = {
