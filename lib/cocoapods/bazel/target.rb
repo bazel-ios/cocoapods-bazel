@@ -542,10 +542,17 @@ module Pod
         end
       end
 
+      def rules_ios_platform_name(platform)
+        name = platform.string_name.downcase
+        return 'macos' if name == 'osx'
+
+        name
+      end
+
       def framework_kwargs
         {
           visibility: ['//visibility:public'],
-          platforms: { pod_target.platform.string_name.downcase => build_os_version || pod_target.platform.deployment_target.to_s }
+          platforms: { rules_ios_platform_name(pod_target.platform) => build_os_version || pod_target.platform.deployment_target.to_s }
         }
       end
 
@@ -632,7 +639,7 @@ module Pod
             'slices' => xcframework.slices.map do |slice|
               {
                 'identifier' => slice.identifier,
-                'platform' => slice.platform.name.to_s,
+                'platform' => rules_ios_platform_name(slice.platform),
                 'platform_variant' => slice.platform_variant.to_s,
                 'supported_archs' => slice.supported_archs,
                 'path' => slice.path.relative_path_from(@package_dir).to_s,
