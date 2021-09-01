@@ -9,6 +9,7 @@ apple_framework(
         "Sources/**/*.m",
         "Sources/**/*.swift",
     ]),
+    infoplists = [{"CFBundleShortVersionString": "1.0.0"}],
     platforms = {"ios": "11.0"},
     private_headers = glob(["Sources/Internal/**/*.h"]),
     swift_version = "5.2",

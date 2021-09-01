@@ -550,8 +550,12 @@ module Pod
       end
 
       def framework_kwargs
+        library_spec = pod_target.file_accessors.find { |fa| fa.spec.library_specification? }.spec
         {
           visibility: ['//visibility:public'],
+          bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER'),
+          infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
+          infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(library_spec.consumer(pod_target.platform).info_plist)),
           platforms: { rules_ios_platform_name(pod_target.platform) => build_os_version || pod_target.platform.deployment_target.to_s }
         }
       end
