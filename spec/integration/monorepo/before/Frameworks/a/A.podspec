@@ -15,6 +15,10 @@ Pod::Spec.new do |s|
   s.source_files = 'Sources/**/*.{h,m,swift}'
   s.private_header_files = 'Sources/Internal/**/*.h'
 
+  s.info_plist = {
+    'CFBundleShortVersionString' => '1.0.0'
+  }
+
   s.test_spec 'Tests' do |ts|
     ts.source_files = 'Tests/**/*.{h,m,swift}'
   end
