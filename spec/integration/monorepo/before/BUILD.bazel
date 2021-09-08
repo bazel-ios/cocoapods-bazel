@@ -1,0 +1,27 @@
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+
+string_flag(
+    name = "foo_flag",
+    build_setting_default = "custom_debug_and_release_1",
+)
+
+config_setting(
+    name = "custom_debug_and_release_1",
+    flag_values = {
+        "//:foo_flag": "custom_debug_and_release_1",
+    },
+)
+
+config_setting(
+    name = "custom_debug_and_release_2",
+    flag_values = {
+        "//Pods/cocoapods-bazel:config": "release",
+    },
+)
+
+config_setting(
+    name = "custom_debug",
+    flag_values = {
+        "//:foo_flag": "custom_debug",
+    },
+)

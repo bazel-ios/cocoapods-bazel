@@ -14,8 +14,16 @@ apple_framework(
     swift_version = "5.2",
     visibility = ["//visibility:public"],
     deps = select({
-        "//Pods/cocoapods-bazel:debug": ["//Pods/OnlyPre"],
+        "@//:custom_debug": ["//Pods/OnlyPre"],
         "//Pods/cocoapods-bazel:release": ["//Frameworks/d:D"],
+        "@//:custom_debug_and_release_1": [
+            "//Pods/OnlyPre",
+            "//Frameworks/d:D",
+        ],
+        "@//:custom_debug_and_release_2": [
+            "//Pods/OnlyPre",
+            "//Frameworks/d:D",
+        ],
     }),
 )
 

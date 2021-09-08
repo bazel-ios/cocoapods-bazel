@@ -13,7 +13,8 @@ module Pod
         }.freeze,
         overrides: {}.freeze,
         buildifier: true,
-        default_xcconfigs: {}.freeze
+        default_xcconfigs: {}.freeze,
+        deps_config_setting_overrides: {}.freeze
       }.with_indifferent_access.freeze
       private_constant :DEFAULTS
 
@@ -54,6 +55,10 @@ module Pod
 
       def default_xcconfigs
         to_h[:default_xcconfigs]
+      end
+
+      def deps_config_setting_overrides
+        to_h[:deps_config_setting_overrides]
       end
     end
   end
