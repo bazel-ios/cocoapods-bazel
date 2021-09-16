@@ -636,6 +636,13 @@ module Pod
         end
       end
 
+      def supported_archs_filter(arch)
+        filtered = arch.filter {|type|
+          type != "arm64e" && type != "armv7s"
+        }
+        filtered
+      end
+
       def vendored_xcframeworks
         pod_target.xcframeworks.values.flatten(1).uniq.map do |xcframework|
           {
@@ -645,7 +652,7 @@ module Pod
                 'identifier' => slice.identifier,
                 'platform' => rules_ios_platform_name(slice.platform),
                 'platform_variant' => slice.platform_variant.to_s,
-                'supported_archs' => slice.supported_archs,
+                'supported_archs' => supported_archs_filter(slice.supported_archs),
                 'path' => slice.path.relative_path_from(@package_dir).to_s,
                 'build_type' => { 'linkage' => slice.build_type.linkage.to_s, 'packaging' => slice.build_type.packaging.to_s }
               }
