@@ -39,7 +39,9 @@ module Pod
           build_file = build_files[package]
 
           bazel_targets = [Target.new(installer, pod_target, nil, default_xcconfigs, config.deps_config_setting_overrides)] +
-                          pod_target.file_accessors.reject { |fa| fa.spec.library_specification? }.map { |fa| Target.new(installer, pod_target, fa.spec, default_xcconfigs, config.deps_config_setting_overrides) }
+                          pod_target.file_accessors.reject { |fa| fa.spec.library_specification? }.map do |fa|
+                            Target.new(installer, pod_target, fa.spec, default_xcconfigs, config.deps_config_setting_overrides)
+                          end
 
           bazel_targets.each do |t|
             load = config.load_for(macro: t.type)
