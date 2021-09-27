@@ -1,0 +1,23 @@
+load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
+
+apple_framework(
+    name = "CustomHeaderSearchPaths",
+    srcs = glob([
+        "Sources/**/*.h",
+        "Sources/**/*.m",
+        "Sources/**/*.swift",
+    ]),
+    objc_copts = [
+        "-IFrameworks/CustomHeaderSearchPaths/Sources",
+        "-I__BAZEL_XCODE_SDKROOT__/usr/include/libxml2",
+    ],
+    platforms = {"ios": "9.0"},
+    private_headers = glob(["Sources/Internal/**/*.h"]),
+    swift_copts = [
+        "-Xcc",
+        "-IFrameworks/CustomHeaderSearchPaths/Sources",
+        "-Xcc",
+        "-I__BAZEL_XCODE_SDKROOT__/usr/include/libxml2",
+    ],
+    visibility = ["//visibility:public"],
+)

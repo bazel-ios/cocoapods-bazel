@@ -1,0 +1,36 @@
+load("@build_bazel_rules_ios//rules:app.bzl", "ios_application")
+load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
+
+apple_framework(
+    name = "EsotericGlobs",
+    srcs = glob([
+        "Sources/**/*.m",
+        "Sources/**/*.h",
+        "SourcesThatDontExist/*.h",
+        "SourcesThatDontExist/*.hh",
+        "SourcesThatDontExist/*.m",
+        "SourcesThatDontExist/*.mm",
+        "SourcesThatDontExist/*.swift",
+        "SourcesThatDontExist/*.c",
+        "SourcesThatDontExist/*.cc",
+        "SourcesThatDontExist/*.cpp",
+    ]),
+    platforms = {"ios": "9.0"},
+    private_headers = glob(["Sources/Private/*.h"]),
+    public_headers = glob(["Sources/Public/*.h"]),
+    visibility = ["//visibility:public"],
+)
+
+ios_application(
+    name = "EsotericGlobs-App",
+    srcs = glob(["App/main.swift"]),
+    bundle_id = "org.cocoapods.EsotericGlobs-App",
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    minimum_os_version = "9.0",
+    module_name = "EsotericGlobs_App",
+    swift_version = "5.2",
+    deps = [":EsotericGlobs"],
+)

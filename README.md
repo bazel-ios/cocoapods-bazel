@@ -44,6 +44,12 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
+## Experimental Features
+
+There are some experimental features that are opt-in and can be enabled adding the plugin to the `Podfile`. Some of these features intentionally break the contract with the `.podspecs` specification in order to create `BUILD` files that are easier to maintain and/or evolve using Bazel features that don't have a direct relationship with what cocoapods does. You'll find the keys to enable such features and a brief explanation/motivation for each in `Bazel::Config::EXPERIMENTAL_FEATURES` (`lib/cocoapods/bazel/config.rb`).
+
+Note that tests for the experimental features are located under `spec/integration/experimental_features` and these should mostly replicate the tests under `spec/integration/monorepo` but with the features on. Also it's a place to create tests specific to a experimental feature that not necessarily will affect the default usage of `cocoapods-bazel`.
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/ob/cocoapods-bazel.

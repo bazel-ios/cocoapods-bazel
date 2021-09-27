@@ -1,0 +1,72 @@
+load("@build_bazel_rules_ios//rules:app.bzl", "ios_application")
+load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
+load("@build_bazel_rules_ios//rules:test.bzl", "ios_unit_test")
+
+apple_framework(
+    name = "A",
+    srcs = glob([
+        "Sources/**/*.h",
+        "Sources/**/*.m",
+        "Sources/**/*.swift",
+    ]),
+    infoplists = [{"CFBundleShortVersionString": "1.0.0"}],
+    platforms = {"ios": "11.0"},
+    private_headers = glob(["Sources/Internal/**/*.h"]),
+    swift_version = "5.2",
+    visibility = ["//visibility:public"],
+)
+
+ios_unit_test(
+    name = "A-Unit-Tests",
+    srcs = glob([
+        "Tests/**/*.h",
+        "Tests/**/*.m",
+        "Tests/**/*.swift",
+    ]),
+    minimum_os_version = "11.0",
+    module_name = "A_Unit_Tests",
+    swift_version = "5.2",
+    deps = [":A"],
+)
+
+ios_application(
+    name = "A-App",
+    srcs = glob([
+        "App/**/*.h",
+        "App/**/*.m",
+        "App/**/*.swift",
+    ]),
+    bundle_id = "org.cocoapods.A-App",
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    linkopts = ["-all_load"],
+    minimum_os_version = "11.0",
+    module_name = "A_App",
+    objc_copts = [
+        "-Wno-conversion",
+        "-Wno-error=at-protocol",
+        "-I/Headers/Private",
+    ],
+    swift_copts = [
+        "-DDEBUG",
+        "-Xcc",
+        "-I/Headers/Private",
+    ],
+    swift_version = "5.2",
+    xcconfig = {
+        "ARCHS": [
+            "arm64",
+            "x86",
+        ],
+        "VERSIONING_SYSTEM": "apple-generic",
+        "SWIFT_OPTIMIZATION_LEVEL_Debug": "-Onone",
+        "SWIFT_OPTIMIZATION_LEVEL_Release": "-Owholemodule",
+    },
+    xcconfig_by_build_setting = {
+        "//Pods/cocoapods-bazel:debug": {"SWIFT_OPTIMIZATION_LEVEL": "-Onone"},
+        "//Pods/cocoapods-bazel:release": {"SWIFT_OPTIMIZATION_LEVEL": "-Owholemodule"},
+    },
+    deps = [":A"],
+)

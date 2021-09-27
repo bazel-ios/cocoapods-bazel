@@ -4,13 +4,7 @@ ENV['COCOAPODS_DISABLE_STATS'] = '1'
 
 source 'https://github.com/CocoaPods/Specs.git'
 
-plugin('cocoapods-bazel',
-  deps_config_setting_overrides: {
-    '@//:custom_debug': [:debug],
-    '@//:custom_debug_and_release_1': [:debug, :release],
-    '@//:custom_debug_and_release_2': [:debug, :release]
-  }
-)
+plugin 'cocoapods-bazel'
 
 use_frameworks!
 
