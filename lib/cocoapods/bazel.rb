@@ -88,9 +88,15 @@ module Pod
 
       if config.experimental_deps_debug_and_release
         configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('string_flag', name: 'deps_config', build_setting_default: 'deps_debug', visibility: ['//visibility:public'])
-        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'deps_debug', flag_values: { ':deps_config' => 'deps_debug' }, visibility: ['//visibility:public'])
-        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'deps_release', flag_values: { ':deps_config' => 'deps_release' }, visibility: ['//visibility:public'])
-        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'deps_debug_and_release', flag_values: { ':deps_config' => 'deps_debug_and_release' }, visibility: ['//visibility:public'])
+        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new(
+          'config_setting', name: 'deps_debug', flag_values: { ':deps_config' => 'deps_debug' }, visibility: ['//visibility:public']
+        )
+        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new(
+          'config_setting', name: 'deps_release', flag_values: { ':deps_config' => 'deps_release' }, visibility: ['//visibility:public']
+        )
+        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new(
+          'config_setting', name: 'deps_debug_and_release', flag_values: { ':deps_config' => 'deps_debug_and_release' }, visibility: ['//visibility:public']
+        )
       end
 
       configs_build_file.save!
