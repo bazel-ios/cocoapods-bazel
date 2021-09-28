@@ -30,7 +30,7 @@ module Pod
       attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
       private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
 
-      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {})
+      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false)
         @installer = installer
         @pod_target = pod_target
         @file_accessors = non_library_spec ? pod_target.file_accessors.select { |fa| fa.spec == non_library_spec } : pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
@@ -40,6 +40,7 @@ module Pod
         @package = installer.sandbox.pod_dir(pod_target.pod_name).relative_path_from(installer.config.installation_root).to_s
         @default_xcconfigs = default_xcconfigs
         @resolved_xconfig_by_config = {}
+        @experimental_deps_debug_and_release = experimental_deps_debug_and_release
       end
 
       def bazel_label(relative_to: nil)
@@ -66,7 +67,7 @@ module Pod
         end
 
         app_spec, app_target = *app_host_info
-        Target.new(installer, app_target, app_spec)
+        Target.new(installer, app_target, app_spec, {}, @experimental_deps_debug_and_release)
       end
 
       def type
@@ -473,8 +474,14 @@ module Pod
         labels_by_config = {}
 
         if !sorted_debug_labels.empty? || !sorted_release_labels.empty?
-          labels_by_config[build_settings_label(:debug)] = sorted_debug_labels
-          labels_by_config[build_settings_label(:release)] = sorted_release_labels
+          if @experimental_deps_debug_and_release
+            labels_by_config[build_settings_label(:deps_debug)] = sorted_debug_labels
+            labels_by_config[build_settings_label(:deps_release)] = sorted_release_labels
+            labels_by_config[build_settings_label(:deps_debug_and_release)] = sorted_debug_labels + sorted_release_labels
+          else
+            labels_by_config[build_settings_label(:debug)] = sorted_debug_labels
+            labels_by_config[build_settings_label(:release)] = sorted_release_labels
+          end
         end
 
         if labels_by_config.empty? # no per-config dependency

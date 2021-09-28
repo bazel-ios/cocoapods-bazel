@@ -38,8 +38,25 @@ module Pod
 
           build_file = build_files[package]
 
-          bazel_targets = [Target.new(installer, pod_target, nil, default_xcconfigs)] +
-                          pod_target.file_accessors.reject { |fa| fa.spec.library_specification? }.map { |fa| Target.new(installer, pod_target, fa.spec, default_xcconfigs) }
+          targets_without_library_specification = pod_target.file_accessors.reject { |fa| fa.spec.library_specification? }.map do |fa|
+            Target.new(
+              installer,
+              pod_target,
+              fa.spec,
+              default_xcconfigs,
+              config.experimental_deps_debug_and_release
+            )
+          end
+
+          default_target = Target.new(
+            installer,
+            pod_target,
+            nil,
+            default_xcconfigs,
+            config.experimental_deps_debug_and_release
+          )
+
+          bazel_targets = [default_target] + targets_without_library_specification
 
           bazel_targets.each do |t|
             load = config.load_for(macro: t.type)
@@ -64,11 +81,23 @@ module Pod
 
       cocoapods_bazel_pkg = Pathname.new(path).relative_path_from Pathname.new(workspace)
       configs_build_file = StarlarkCompiler::BuildFile.new(workspace: workspace, package: cocoapods_bazel_pkg)
-
       configs_build_file.add_load(of: 'string_flag', from: '@bazel_skylib//rules:common_settings.bzl')
       configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('string_flag', name: 'config', build_setting_default: 'debug', visibility: ['//visibility:public'])
-      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'debug', flag_values: { ':config' => 'debug' })
-      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'release', flag_values: { ':config' => 'release' })
+      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'debug', flag_values: { ':config' => 'debug' }, visibility: ['//visibility:public'])
+      configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('config_setting', name: 'release', flag_values: { ':config' => 'release' }, visibility: ['//visibility:public'])
+
+      if config.experimental_deps_debug_and_release
+        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new('string_flag', name: 'deps_config', build_setting_default: 'deps_debug', visibility: ['//visibility:public'])
+        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new(
+          'config_setting', name: 'deps_debug', flag_values: { ':deps_config' => 'deps_debug' }, visibility: ['//visibility:public']
+        )
+        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new(
+          'config_setting', name: 'deps_release', flag_values: { ':deps_config' => 'deps_release' }, visibility: ['//visibility:public']
+        )
+        configs_build_file.add_target StarlarkCompiler::AST::FunctionCall.new(
+          'config_setting', name: 'deps_debug_and_release', flag_values: { ':deps_config' => 'deps_debug_and_release' }, visibility: ['//visibility:public']
+        )
+      end
 
       configs_build_file.save!
       format_files(build_files: { cocoapods_bazel_pkg => configs_build_file }, buildifier: config.buildifier, workspace: workspace)
