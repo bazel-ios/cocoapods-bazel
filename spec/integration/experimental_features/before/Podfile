@@ -6,7 +6,9 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 plugin(
   'cocoapods-bazel',
-  experimental_deps_debug_and_release: true
+  features: {
+    experimental_deps_debug_and_release: true
+  }
 )
 
 use_frameworks!

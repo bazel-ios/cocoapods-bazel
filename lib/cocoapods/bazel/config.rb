@@ -68,18 +68,11 @@ module Pod
       def self.from_podfile(podfile)
         return unless enabled_in_podfile?(podfile)
 
-        plugin_config = podfile.plugins[PLUGIN_KEY]
-
-        features = plugin_config[:features] || {}
-        features.each do |key|
-          raise "Unrecognized feature: #{key} in Podfile. Available options: #{FEATURES}" unless FEATURES.include?(key)
-        end
-
-        from_podfile_options(plugin_config)
+        from_podfile_options(podfile.plugins[PLUGIN_KEY])
       end
 
       def self.from_podfile_options(options)
-        new(DEFAULTS.merge(options) do |_key, old_val, new_val|
+        config = new(DEFAULTS.merge(options) do |_key, old_val, new_val|
           case old_val
           when Hash
             old_val.merge(new_val) # intentionally only 1 level deep of merging
@@ -87,6 +80,15 @@ module Pod
             new_val
           end
         end)
+
+        # Validating if only supported/valid experimental features
+        # exist in the Podfile (only applies if :features is not empty)
+        features = config.to_h[:features] || {}
+        features.keys.map(&:to_sym).each do |key|
+          raise "Unrecognized experimental feature '#{key}' in Podfile. Available options are: #{EXPERIMENTAL_FEATURES}" unless EXPERIMENTAL_FEATURES.include?(key)
+        end
+
+        config
       end
 
       def initialize(to_h)
@@ -106,7 +108,7 @@ module Pod
       end
 
       def experimental_deps_debug_and_release
-        to_h[:experimental_deps_debug_and_release]
+        to_h[:features][:experimental_deps_debug_and_release]
       end
     end
   end
