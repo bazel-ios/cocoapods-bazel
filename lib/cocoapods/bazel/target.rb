@@ -127,6 +127,10 @@ module Pod
         debug_only_xcconfig = debug_xcconfig.reject { |k, v| release_xcconfig[k] == v }
         release_only_xcconfig = release_xcconfig.reject { |k, v| debug_xcconfig[k] == v }
 
+        if label == 'Wire'
+          debug_only_xcconfig['SWIFT_OPTIMIZATION_LEVEL'] = '-O'
+        end
+
         xconfig_by_build_setting = {}
         xconfig_by_build_setting[build_settings_label(:debug)] = debug_only_xcconfig unless debug_only_xcconfig.empty?
         xconfig_by_build_setting[build_settings_label(:release)] = release_only_xcconfig unless release_only_xcconfig.empty?
