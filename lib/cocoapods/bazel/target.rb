@@ -27,10 +27,10 @@ module Pod
 
       include XCConfigResolver
 
-      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
-      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
+      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :external_repository
+      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :external_repository
 
-      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false)
+      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false, external_repository = false)
         @installer = installer
         @pod_target = pod_target
         @file_accessors = non_library_spec ? pod_target.file_accessors.select { |fa| fa.spec == non_library_spec } : pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
@@ -41,16 +41,21 @@ module Pod
         @default_xcconfigs = default_xcconfigs
         @resolved_xconfig_by_config = {}
         @experimental_deps_debug_and_release = experimental_deps_debug_and_release
+        @external_repository = external_repository
       end
 
       def bazel_label(relative_to: nil)
         package_basename = File.basename(package)
+        packageName = package
+        if external_repository
+          packageName = package.gsub('Pods/', '@Pods//')
+        end
         if package == relative_to
           ":#{label}"
         elsif package_basename == label
-          "//#{package}"
+          "#{packageName}"
         else
-          "//#{package}:#{label}"
+          "#{packageName}:#{label}"
         end
       end
 
@@ -67,7 +72,7 @@ module Pod
         end
 
         app_spec, app_target = *app_host_info
-        Target.new(installer, app_target, app_spec, {}, @experimental_deps_debug_and_release)
+        Target.new(installer, app_target, app_spec, {}, @experimental_deps_debug_and_release, @external_repository)
       end
 
       def type
@@ -97,7 +102,7 @@ module Pod
             raise "Unhandled: #{non_library_spec.spec_type}"
           end
 
-        targets.transform_values { |v| v.uniq.map { |target| self.class.new(installer, target) } }
+        targets.transform_values { |v| v.uniq.map { |target| self.class.new(installer, target, nil, {}, false, @external_repository) } }
       end
 
       def product_module_name

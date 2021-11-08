@@ -54,7 +54,8 @@ module Pod
         default_xcconfigs: {}.freeze,
         features: {
           experimental_deps_debug_and_release: false
-        }
+        },
+        external_repository: false
       }.with_indifferent_access.freeze
 
       private_constant :DEFAULTS
@@ -109,6 +110,9 @@ module Pod
 
       def experimental_deps_debug_and_release
         to_h[:features][:experimental_deps_debug_and_release]
+      end
+      def external_repository
+        to_h[:external_repository]
       end
     end
   end

@@ -26,7 +26,7 @@ module Pod
         build_files = Hash.new { |h, k| h[k] = StarlarkCompiler::BuildFile.new(workspace: workspace, package: k) }
         installer.pod_targets.each do |pod_target|
           package = sandbox.pod_dir(pod_target.pod_name).relative_path_from(workspace).to_s
-          if package.start_with?('..')
+          if package.start_with?('..') and not config.external_repository
             raise Informative, <<~MSG
               Bazel does not support Pod located outside of current workspace: \"#{package}\".
               To fix this, you can move the Pod into workspace,
@@ -44,7 +44,8 @@ module Pod
               pod_target,
               fa.spec,
               default_xcconfigs,
-              config.experimental_deps_debug_and_release
+              config.experimental_deps_debug_and_release,
+              config.external_repository
             )
           end
 
@@ -53,7 +54,8 @@ module Pod
             pod_target,
             nil,
             default_xcconfigs,
-            config.experimental_deps_debug_and_release
+            config.experimental_deps_debug_and_release,
+            config.external_repository
           )
 
           bazel_targets = [default_target] + targets_without_library_specification
