@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cocoapods-bazel (0.1.2)
+    cocoapods-bazel (0.1.3)
       starlark_compiler (~> 0.3)
 
 GEM
@@ -113,7 +113,7 @@ GEM
       unicode-display_width (>= 1.4.0, < 1.7)
     ruby-macho (1.4.0)
     ruby-progressbar (1.10.1)
-    starlark_compiler (0.3.0)
+    starlark_compiler (0.4.0)
     thread_safe (0.3.6)
     typhoeus (1.4.0)
       ethon (>= 0.9.0)
