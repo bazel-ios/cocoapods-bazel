@@ -8,7 +8,7 @@ module Pod
         # When enabled cocoapods-bazel will add one additional config_setting for the 'deps' attribute only
         # containing both 'debug' and 'release' dependencies.
         #
-        # In other works when this flag is active cocoapods-bazel will continue to create these:
+        # In other words when this flag is active cocoapods-bazel will continue to create these:
         #
         # - //Pods/cocoapods-bazel:debug
         # - //Pods/cocoapods-bazel:release
@@ -40,7 +40,16 @@ module Pod
         # This might be ok for some teams but it prevents others that are interested in using cocoapods-bazel to migrate to Bazel and eventually stop
         # depending on cocoapods. If the generated BUILD files don't contain "all" states and a 'pod install' is always required it's not trivial how to eventually treat the
         # BUILD files as source of truth.
-        :experimental_deps_debug_and_release
+        :experimental_deps_debug_and_release,
+        # When enabled, cocoapods-bazel will generate pod dependencies with labels pointing to an external "Pods" repository
+        # For Example:
+        #
+        # //Pods/SomePod
+        # 
+        # Becomes
+        #
+        # @Pods//SomePod
+        :external_repository
       ].freeze
       private_constant :PLUGIN_KEY
       DEFAULTS = {
@@ -53,9 +62,9 @@ module Pod
         buildifier: true,
         default_xcconfigs: {}.freeze,
         features: {
-          experimental_deps_debug_and_release: false
+          experimental_deps_debug_and_release: false,
+          external_repository: false
         },
-        external_repository: false
       }.with_indifferent_access.freeze
 
       private_constant :DEFAULTS
@@ -112,7 +121,7 @@ module Pod
         to_h[:features][:experimental_deps_debug_and_release]
       end
       def external_repository
-        to_h[:external_repository]
+        to_h[:features][:external_repository]
       end
     end
   end
