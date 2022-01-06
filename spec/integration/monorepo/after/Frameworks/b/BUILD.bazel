@@ -169,6 +169,7 @@ ios_application(
         },
         "//Pods/cocoapods-bazel:release": {
             "INFOPLIST_FILE": "Resources/release.plist",
+            "CODE_SIGN_ENTITLEMENTS": "",
             "PRODUCT_BUNDLE_IDENTIFIER": "org.cocoapods.B-DebuggableOnlyApp",
         },
     },

@@ -46,7 +46,7 @@ module Pod
 
         xcconfig.each_key { |k| xcconfig[k] = resolved_build_setting_value(k, settings: xcconfig) }
         xcconfig.delete_if do |k, v|
-          UNRESOLVED_SETTINGS.include?(k) || v.empty?
+          UNRESOLVED_SETTINGS.include?(k)
         end
 
         unless matching_defaults.empty?

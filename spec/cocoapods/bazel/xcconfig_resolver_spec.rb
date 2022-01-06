@@ -12,18 +12,22 @@ RSpec.describe Pod::Bazel::XCConfigResolver do
       'ENABLE_TESTABILITY_Debug' => 'YES',
       'ENABLE_TESTABILITY_Release' => 'NO',
       'ENABLE_TESTABILITY' => '$(ENABLE_TESTABILITY_$(CONFIGURATION))',
+      'EMPTY_CONFIG' => '',
 
       'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) foo bar=1 "baz=${ENABLE_TESTABILITY}"',
 
-      'CONFIGURATION' => 'Debug'
+      'CONFIGURATION' => 'Debug',
     )
     expect(default_config_name).to be_nil
     expect(resolved).to eq(
       'ENABLE_TESTABILITY' => 'YES',
       'ENABLE_TESTABILITY_Debug' => 'YES',
       'ENABLE_TESTABILITY_Release' => 'NO',
+      'EMPTY_CONFIG' => '',
 
-      'GCC_PREPROCESSOR_DEFINITIONS' => ['foo', 'bar=1', 'baz=YES']
+      'GCC_PREPROCESSOR_DEFINITIONS' => ['foo', 'bar=1', 'baz=YES'],
+
+      'FOO_BAR' => ''
     )
   end
 end
