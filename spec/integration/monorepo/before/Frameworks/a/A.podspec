@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 Pod::Spec.new do |s|
+  other_cflags = '-Wno-conversion -Wno-error=at-protocol'
   s.name = 'A'
   s.version = '1.0.0.LOCAL'
 
@@ -29,7 +30,7 @@ Pod::Spec.new do |s|
     as.pod_target_xcconfig = {
       'ARCHS' => 'arm64 x86',
       'HEADER_SEARCH_PATHS'=> "${PODS_ROOT}/Headers/Private",
-      'OTHER_CFLAGS' => '-Wno-conversion -Wno-error=at-protocol',
+      'OTHER_CFLAGS' => other_cflags,
       'OTHER_LDFLAGS' => '-all_load',
       'OTHER_SWIFT_FLAGS' => '-DDEBUG',
       'VERSIONING_SYSTEM' => 'apple-generic',
