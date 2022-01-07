@@ -25,9 +25,7 @@ RSpec.describe Pod::Bazel::XCConfigResolver do
       'ENABLE_TESTABILITY_Release' => 'NO',
       'EMPTY_CONFIG' => '',
 
-      'GCC_PREPROCESSOR_DEFINITIONS' => ['foo', 'bar=1', 'baz=YES'],
-
-      'FOO_BAR' => ''
+      'GCC_PREPROCESSOR_DEFINITIONS' => ['foo', 'bar=1', 'baz=YES']
     )
   end
 end
