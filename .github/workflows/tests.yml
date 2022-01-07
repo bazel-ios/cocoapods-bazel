@@ -9,11 +9,11 @@ on:
 jobs:
   integration_tests:
     name: Build and Test
-    runs-on: macos-10.15 # Check out which xcode to use if updating macos:https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-software
+    runs-on: macos-latest # Check out which xcode to use if updating macos:https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-software
     steps:
       - uses: actions/checkout@v1
-      - name: Select Xcode 12.5
-        run: sudo xcode-select -s /Applications/Xcode_12.5.app/Contents/Developer
+      - name: Print Xcode version
+        run: sudo xcode-select -p
       - uses: actions/setup-ruby@v1
         with:
           ruby-version: "2.x" # Version range or exact version of a Ruby version to use, using semvers version range syntax.
