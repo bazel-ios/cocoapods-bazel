@@ -16,7 +16,7 @@ RSpec.describe Pod::Bazel::XCConfigResolver do
 
       'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) foo bar=1 "baz=${ENABLE_TESTABILITY}"',
 
-      'CONFIGURATION' => 'Debug',
+      'CONFIGURATION' => 'Debug'
     )
     expect(default_config_name).to be_nil
     expect(resolved).to eq(
