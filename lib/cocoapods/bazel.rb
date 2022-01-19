@@ -71,7 +71,7 @@ module Pod
           build_files.each_key.each do |key|
             path = File.join(workspace, key, 'BUILD.bazel')
             content = File.read(path)
-            File.write(path, "# #{config.build_file_doc}\n\n" + content)
+            File.write(path, "'''\n#{config.build_file_doc}\n'''\n\n" + content)
           end
         end
 

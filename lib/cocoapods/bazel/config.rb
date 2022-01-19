@@ -40,8 +40,7 @@ module Pod
         # This might be ok for some teams but it prevents others that are interested in using cocoapods-bazel to migrate to Bazel and eventually stop
         # depending on cocoapods. If the generated BUILD files don't contain "all" states and a 'pod install' is always required it's not trivial how to eventually treat the
         # BUILD files as source of truth.
-        :experimental_deps_debug_and_release,
-        :build_file_doc
+        :experimental_deps_debug_and_release
       ].freeze
       private_constant :PLUGIN_KEY
       DEFAULTS = {
@@ -53,9 +52,9 @@ module Pod
         overrides: {}.freeze,
         buildifier: true,
         default_xcconfigs: {}.freeze,
+        build_file_doc: '',
         features: {
-          experimental_deps_debug_and_release: false,
-          build_file_doc: ""
+          experimental_deps_debug_and_release: false
         }
       }.with_indifferent_access.freeze
 
@@ -114,7 +113,7 @@ module Pod
       end
 
       def build_file_doc
-        to_h[:features][:build_file_doc]
+        to_h[:build_file_doc]
       end
     end
   end

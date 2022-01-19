@@ -1,3 +1,6 @@
+0.1.3
+
+* Add ability to insert a docstring at top of generated build files
 
 0.1.2
 
