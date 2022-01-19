@@ -4,7 +4,10 @@ ENV['COCOAPODS_DISABLE_STATS'] = '1'
 
 source 'https://github.com/CocoaPods/Specs.git'
 
-plugin 'cocoapods-bazel'
+plugin(
+  'cocoapods-bazel',
+  build_file_doc: "Test docstring\nthat takes two lines"
+)
 
 use_frameworks!
 

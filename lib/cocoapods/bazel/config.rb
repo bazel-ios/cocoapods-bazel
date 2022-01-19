@@ -52,6 +52,7 @@ module Pod
         overrides: {}.freeze,
         buildifier: true,
         default_xcconfigs: {}.freeze,
+        build_file_doc: '',
         features: {
           experimental_deps_debug_and_release: false
         }
@@ -109,6 +110,10 @@ module Pod
 
       def experimental_deps_debug_and_release
         to_h[:features][:experimental_deps_debug_and_release]
+      end
+
+      def build_file_doc
+        to_h[:build_file_doc]
       end
     end
   end

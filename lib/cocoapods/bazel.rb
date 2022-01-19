@@ -67,6 +67,13 @@ module Pod
 
         build_files.each_value(&:save!)
         format_files(build_files: build_files, buildifier: config.buildifier, workspace: workspace)
+        unless config.build_file_doc.empty?
+          build_files.each_key.each do |key|
+            path = File.join(workspace, key, 'BUILD.bazel')
+            content = File.read(path)
+            File.write(path, "'''\n#{config.build_file_doc}\n'''\n\n" + content)
+          end
+        end
 
         cocoapods_bazel_path = File.join(sandbox.root, 'cocoapods-bazel')
         FileUtils.mkdir_p cocoapods_bazel_path
