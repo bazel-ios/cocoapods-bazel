@@ -1,6 +1,7 @@
 0.1.3
 
-* Add ability to insert a docstring at top of generated build files
+* Add ability to insert a docstring at top of generated build files (#58)
+* Remove expand_directories for resource_bundle (#48)
 
 0.1.2
 
