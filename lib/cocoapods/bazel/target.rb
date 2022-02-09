@@ -287,9 +287,9 @@ module Pod
             # public headers
             add(:public_headers, glob(attr: :public_headers, sorted: false, excludes: private_header_files_array).yield_self { |f| case f when Array then f.reject { |path| path.include? '.framework/' } else f end }, defaults: [[]])
             .add(:private_headers, glob(attr: :private_headers).yield_self { |f| case f when Array then f.reject { |path| path.include? '.framework/' } else f end }, defaults: [[]])
-            .add(:pch, glob(attr: :prefix_header, return_files: true).first, defaults: [nil])
-            .add(:data, glob(attr: :resources, exclude_directories: 0), defaults: [[]])
-            .add(:resource_bundles, {}, defaults: [{}])
+            .add(:pch, glob(attr: :prefix_header, return_files: true).first, defaults: [nil]).
+            # .add(:data, glob(attr: :resources, exclude_directories: 0), defaults: [[]])
+            add(:resource_bundles, { product_module_name+"_bundle" => glob(attr: :resources, exclude_directories: 0)}, defaults: [{}])
             .add(:swift_version, uses_swift? && pod_target.swift_version, defaults: [nil, false])
             .add(:swift_objc_bridging_header, swift_objc_bridging_header, defaults: [nil])
 
@@ -346,7 +346,7 @@ module Pod
             patterns_by_exclude.concat(file_patterns.flat_map { |g| expand_glob(g, expand_directories: false) })
           end
         end.tap do |bundles|
-          kwargs[:resource_bundles] = bundles.map do |bundle_name, patterns_by_excludes|
+          kwargs[:resource_bundles].merge!( bundles.map do |bundle_name, patterns_by_excludes|
             patterns_by_excludes.delete_if { |_, v| v.empty? }
             # resources implicitly have dirs expanded by CocoaPods
             resources = patterns_by_excludes.map do |excludes, globs|
@@ -354,7 +354,7 @@ module Pod
               starlark { function_call(:glob, globs.uniq, exclude_directories: 0, **excludes) }
             end.reduce(&:+)
             [bundle_name, resources]
-          end.to_h
+          end.to_h)
         end
 
         # non-propagated stuff for a target that should build.
