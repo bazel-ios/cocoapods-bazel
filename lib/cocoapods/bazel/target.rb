@@ -542,7 +542,7 @@ module Pod
           elsif glob.end_with?('/*')
             [glob.sub(%r{/\*$}, '/**/*')]
           else
-            [glob, glob.chomp('/') + '/**/*']
+            [glob.chomp('/') + '/**/*']
           end
         else
           [glob]
