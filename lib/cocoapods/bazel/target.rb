@@ -342,7 +342,7 @@ module Pod
           fa.spec_consumer.resource_bundles.each do |name, file_patterns|
             bundle = bundles[name] ||= {}
             patterns_by_exclude = bundle[fa.spec_consumer.exclude_files] ||= []
-            patterns_by_exclude.concat(file_patterns.flat_map { |g| expand_glob(g, expand_directories: false) })
+            patterns_by_exclude.concat(file_patterns.flat_map { |g| expand_glob(g, expand_directories: true) })
           end
         end.tap do |bundles|
           kwargs[:resource_bundles] = bundles.map do |bundle_name, patterns_by_excludes|
@@ -542,7 +542,7 @@ module Pod
           elsif glob.end_with?('/*')
             [glob.sub(%r{/\*$}, '/**/*')]
           else
-            [glob, glob.chomp('/') + '/**/*']
+            [glob.chomp('/') + '/**/*']
           end
         else
           [glob]
