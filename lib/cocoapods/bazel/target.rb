@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'set'
+
 require_relative 'xcconfig_resolver'
 
 module Pod
@@ -521,11 +523,11 @@ module Pod
       def expand_glob(glob, extensions: nil, expand_directories: false)
         if (m = glob.match(/\{([^\{\}]+)\}/))
           m[1].split(',').flat_map do |alt|
-            expand_glob("#{m.pre_match}#{alt}#{m.post_match}")
+            expand_glob("#{m.pre_match}#{alt.strip}#{m.post_match}", extensions: extensions, expand_directories: expand_directories)
           end.uniq
         elsif (m = glob.match(/\[([^\[\]]+)\]/))
           m[1].each_char.flat_map do |alt|
-            expand_glob("#{m.pre_match}#{alt}#{m.post_match}")
+            expand_glob("#{m.pre_match}#{alt.strip}#{m.post_match}", extensions: extensions, expand_directories: expand_directories)
           end.uniq
         elsif extensions && File.extname(glob).empty?
           glob = glob.chomp('**/*') # If we reach here and the glob ends with **/*, we need to avoid duplicating it (we do not want to end up with **/*/**/*)
@@ -541,12 +543,22 @@ module Pod
             [glob]
           elsif glob.end_with?('/*')
             [glob.sub(%r{/\*$}, '/**/*')]
+          elsif should_skip_directory_expansion(glob)
+            [glob]
           else
             [glob.chomp('/') + '/**/*']
           end
         else
           [glob]
         end
+      end
+
+      # We should expand only folder globs, not expand file globs.
+      # E.g., xib files glob "*.xib" should not be expanded to "*.xib/**/*", otherise nothing will be matched
+      def should_skip_directory_expansion(glob)
+        extension = File.extname(glob)
+        expansion_extentions = Set['.xcassets', '.xcdatamodeld', '.lproj']
+        !expansion_extentions.include?(extension)
       end
 
       def rules_ios_platform_name(platform)

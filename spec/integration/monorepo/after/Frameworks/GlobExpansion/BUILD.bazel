@@ -1,0 +1,44 @@
+"""
+Test docstring
+that takes two lines
+"""
+
+load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
+
+apple_framework(
+    name = "GlobExpansion",
+    platforms = {"ios": "9.0"},
+    resource_bundles = {
+        "ShouldExpand": glob(
+            [
+                "Resources/Localization/*.lproj/**/*",
+                "Resources/Images.xcassets/**/*",
+                "Resources/*.xcdatamodeld/**/*",
+            ],
+            exclude_directories = 0,
+        ),
+        "ShouldNotExpand": glob(
+            [
+                "Resources/*.xib",
+                "Resources/*.strings",
+                "Resources/*.png",
+                "Resources/*.otf",
+                "Resources/*.storyboard",
+                "Resources/**/*",
+            ],
+            exclude_directories = 0,
+        ),
+        "Composite": glob(
+            [
+                "Resources/*.strings",
+                "Resources/*.json",
+                "Resources/*.lproj/**/*",
+                "Resources/*.storyboard",
+                "Resources/*.xcassets/**/*",
+                "Resources/*.xib",
+            ],
+            exclude_directories = 0,
+        ),
+    },
+    visibility = ["//visibility:public"],
+)
