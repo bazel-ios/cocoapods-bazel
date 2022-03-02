@@ -557,7 +557,7 @@ module Pod
       # E.g., xib files glob "*.xib" should not be expanded to "*.xib/**/*", otherise nothing will be matched
       def should_skip_directory_expansion(glob)
         extension = File.extname(glob)
-        expansion_extentions = Set[".xcassets", ".xcdatamodeld", ".lproj"]
+        expansion_extentions = Set['.xcassets', '.xcdatamodeld', '.lproj']
         !expansion_extentions.include?(extension)
       end
 
