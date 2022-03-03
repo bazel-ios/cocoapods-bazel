@@ -280,13 +280,14 @@ module Pod
 
       def to_rule_kwargs
         kwargs = RuleArgs.new do |args|
+          private_header_files_array = file_accessors.map(&:spec_consumer).flat_map(&:private_header_files).flat_map { |g| expand_glob(g, expand_directories: false) }
           args
             .add(:name, label)
             .add(:module_name, product_module_name, defaults: [label])
             .add(:module_map, !non_library_spec && file_accessors.map(&:module_map).find(&:itself)&.relative_path_from(@package_dir)&.to_s, defaults: [nil, false]).
 
             # public headers
-            add(:public_headers, glob(attr: :public_headers, sorted: false).yield_self { |f| case f when Array then f.reject { |path| path.include? '.framework/' } else f end }, defaults: [[]])
+            add(:public_headers, glob(attr: :public_headers, sorted: false, excludes: private_header_files_array).yield_self { |f| case f when Array then f.reject { |path| path.include? '.framework/' } else f end }, defaults: [[]])
             .add(:private_headers, glob(attr: :private_headers).yield_self { |f| case f when Array then f.reject { |path| path.include? '.framework/' } else f end }, defaults: [[]])
             .add(:pch, glob(attr: :prefix_header, return_files: true).first, defaults: [nil])
             .add(:data, glob(attr: :resources, exclude_directories: 0), defaults: [[]])
