@@ -8,7 +8,8 @@ module Pod
       def resolved_build_setting_value(setting, settings:)
         return unless (value = settings[setting])
 
-        sub_prefix = ->(s) { s.sub(%r{\A:/}, '') }
+        sub_prefix = ->(s) { s.to_s.sub(%r{\A:/}, '') }
+
         resolved = resolve_string_with_build_settings(value, settings: settings)
         if Pod::Target::BuildSettings::PLURAL_SETTINGS.include?(setting)
           resolved.shellsplit.reject(&:empty?).map(&sub_prefix)
