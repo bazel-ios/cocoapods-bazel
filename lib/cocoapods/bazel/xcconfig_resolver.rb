@@ -31,6 +31,7 @@ module Pod
         'OTHER_CFLAGS', # serialized separately as objc_copts
         'OTHER_SWIFT_FLAGS', # serialized separately as swift_copts
         'OTHER_LDFLAGS', # serialized separately as linkopts
+        'PODS_ROOT', # not needed, used to help resolve the Pods root path relative to the current package
         'PODS_TARGET_SRCROOT', # not needed, used to help resolve file references relative to the current package
         'SDKROOT', # not needed since the SDKROOT gets propagated via the apple configuration transition
         'SRCROOT', # not needed, used to help resolve file references relative to the current workspace

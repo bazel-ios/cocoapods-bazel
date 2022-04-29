@@ -27,8 +27,8 @@ module Pod
 
       include XCConfigResolver
 
-      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
-      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
+      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
+      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
 
       def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false)
         @installer = installer
@@ -41,6 +41,7 @@ module Pod
         @default_xcconfigs = default_xcconfigs
         @resolved_xconfig_by_config = {}
         @experimental_deps_debug_and_release = experimental_deps_debug_and_release
+        @relative_sandbox_root = installer.sandbox.root.relative_path_from(installer.config.installation_root).to_s
       end
 
       def bazel_label(relative_to: nil)
@@ -55,7 +56,6 @@ module Pod
       end
 
       def build_settings_label(config)
-        relative_sandbox_root = @installer.sandbox.root.relative_path_from(@installer.config.installation_root).to_s
         cocoapods_bazel_path = File.join(relative_sandbox_root, 'cocoapods-bazel')
 
         "//#{cocoapods_bazel_path}:#{config}"
@@ -158,6 +158,7 @@ module Pod
           .to_h
           .merge(
             'CONFIGURATION' => configuration.to_s.capitalize,
+            'PODS_ROOT' => "//#{relative_sandbox_root}",
             'PODS_TARGET_SRCROOT' => ':',
             'SRCROOT' => ':',
             'SDKROOT' => '__BAZEL_XCODE_SDKROOT__'
