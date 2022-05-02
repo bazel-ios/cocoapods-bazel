@@ -72,8 +72,8 @@ ios_application(
     minimum_os_version = "11.0",
     module_name = "B_App",
     objc_copts = select({
-        "//Pods/cocoapods-bazel:debug": ["-I/Headers/Private/Debug"],
-        "//Pods/cocoapods-bazel:release": ["-I/Headers/Private/Release"],
+        "//Pods/cocoapods-bazel:debug": ["-I//Pods/Headers/Private/Debug"],
+        "//Pods/cocoapods-bazel:release": ["-I//Pods/Headers/Private/Release"],
     }) + [
         "-Wno-conversion",
         "-Wno-error=at-protocol",
@@ -81,17 +81,17 @@ ios_application(
     swift_copts = select({
         "//Pods/cocoapods-bazel:debug": [
             "-Xcc",
-            "-I/Headers/Private/Debug",
+            "-I//Pods/Headers/Private/Debug",
         ],
         "//Pods/cocoapods-bazel:release": [
             "-Xcc",
-            "-I/Headers/Private/Release",
+            "-I//Pods/Headers/Private/Release",
         ],
     }),
     swift_version = "5.2",
     xcconfig = {
-        "HEADER_SEARCH_PATHS_Debug": "/Headers/Private/Debug",
-        "HEADER_SEARCH_PATHS_Release": "/Headers/Private/Release",
+        "HEADER_SEARCH_PATHS_Debug": "//Pods/Headers/Private/Debug",
+        "HEADER_SEARCH_PATHS_Release": "//Pods/Headers/Private/Release",
         "INFOPLIST_FILE_Debug": "Resources/debug.plist",
         "INFOPLIST_FILE_Release": "Resources/release.plist",
         "CODE_SIGN_ENTITLEMENTS_Debug": "Resources/debug.entitlements",
@@ -140,8 +140,8 @@ ios_application(
     minimum_os_version = "11.0",
     module_name = "B_DebuggableOnlyApp",
     objc_copts = select({
-        "//Pods/cocoapods-bazel:debug": ["-I/Headers/Private/Debug"],
-        "//Pods/cocoapods-bazel:release": ["-I/Headers/Private/Release"],
+        "//Pods/cocoapods-bazel:debug": ["-I//Pods/Headers/Private/Debug"],
+        "//Pods/cocoapods-bazel:release": ["-I//Pods/Headers/Private/Release"],
     }) + [
         "-Wno-conversion",
         "-Wno-error=at-protocol",
@@ -149,17 +149,17 @@ ios_application(
     swift_copts = select({
         "//Pods/cocoapods-bazel:debug": [
             "-Xcc",
-            "-I/Headers/Private/Debug",
+            "-I//Pods/Headers/Private/Debug",
         ],
         "//Pods/cocoapods-bazel:release": [
             "-Xcc",
-            "-I/Headers/Private/Release",
+            "-I//Pods/Headers/Private/Release",
         ],
     }),
     swift_version = "5.2",
     xcconfig = {
-        "HEADER_SEARCH_PATHS_Debug": "/Headers/Private/Debug",
-        "HEADER_SEARCH_PATHS_Release": "/Headers/Private/Release",
+        "HEADER_SEARCH_PATHS_Debug": "//Pods/Headers/Private/Debug",
+        "HEADER_SEARCH_PATHS_Release": "//Pods/Headers/Private/Release",
         "INFOPLIST_FILE_Debug": "Resources/debug.plist",
         "INFOPLIST_FILE_Release": "Resources/release.plist",
         "CODE_SIGN_ENTITLEMENTS_Debug": "Resources/debug.entitlements",

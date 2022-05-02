@@ -1,9 +1,14 @@
+"""
+Test docstring
+that takes two lines
+"""
+
 load("@build_bazel_rules_ios//rules:app.bzl", "ios_application")
 load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
 load("@build_bazel_rules_ios//rules:test.bzl", "ios_unit_test")
 
 apple_framework(
-    name = "A",
+    name = "UsingPodEnvVars",
     srcs = glob([
         "Sources/**/*.h",
         "Sources/**/*.m",
@@ -17,33 +22,41 @@ apple_framework(
 )
 
 ios_unit_test(
-    name = "A-Unit-Tests",
+    name = "UsingPodEnvVars-Unit-Tests",
     srcs = glob([
         "Tests/**/*.h",
         "Tests/**/*.m",
         "Tests/**/*.swift",
     ]),
+    env = {
+        "TEST_PODS_ROOT_ENV_VAR": "//Pods/Testing/Env/Var",
+        "TEST_PODS_TARGET_SRCROOT_ENV_VAR": "Testing/Env/Var",
+    },
     minimum_os_version = "11.0",
-    module_name = "A_Unit_Tests",
+    module_name = "UsingPodEnvVars_Unit_Tests",
     swift_version = "5.2",
-    deps = [":A"],
+    xcconfig = {
+        "TEST_PODS_ROOT_ENV_VAR": "//Pods/Testing/Env/Var",
+        "TEST_PODS_TARGET_SRCROOT_ENV_VAR": "Testing/Env/Var",
+    },
+    deps = [":UsingPodEnvVars"],
 )
 
 ios_application(
-    name = "A-App",
+    name = "UsingPodEnvVars-App",
     srcs = glob([
         "App/**/*.h",
         "App/**/*.m",
         "App/**/*.swift",
     ]),
-    bundle_id = "org.cocoapods.A-App",
+    bundle_id = "org.cocoapods.UsingPodEnvVars-App",
     families = [
         "iphone",
         "ipad",
     ],
     linkopts = ["-all_load"],
     minimum_os_version = "11.0",
-    module_name = "A_App",
+    module_name = "UsingPodEnvVars_App",
     objc_copts = [
         "-Wno-conversion",
         "-Wno-error=at-protocol",
@@ -63,10 +76,12 @@ ios_application(
         "VERSIONING_SYSTEM": "apple-generic",
         "SWIFT_OPTIMIZATION_LEVEL_Debug": "-Onone",
         "SWIFT_OPTIMIZATION_LEVEL_Release": "-Owholemodule",
+        "TEST_PODS_ROOT_ENV_VAR": "//Pods/Testing/Env/Var",
+        "TEST_PODS_TARGET_SRCROOT_ENV_VAR": "Testing/Env/Var",
     },
     xcconfig_by_build_setting = {
         "//Pods/cocoapods-bazel:debug": {"SWIFT_OPTIMIZATION_LEVEL": "-Onone"},
         "//Pods/cocoapods-bazel:release": {"SWIFT_OPTIMIZATION_LEVEL": "-Owholemodule"},
     },
-    deps = [":A"],
+    deps = [":UsingPodEnvVars"],
 )
