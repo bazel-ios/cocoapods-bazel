@@ -36,7 +36,7 @@ ios_unit_test(
     module_name = "UsingPodEnvVars_Unit_Tests",
     swift_version = "5.2",
     xcconfig = {
-        "TEST_PODS_ROOT_ENV_VAR": "//Pods/Testing/Env/Var",
+        "TEST_PODS_ROOT_ENV_VAR": "/Testing/Env/Var",
         "TEST_PODS_TARGET_SRCROOT_ENV_VAR": "Testing/Env/Var",
     },
     deps = [":UsingPodEnvVars"],
@@ -60,12 +60,12 @@ ios_application(
     objc_copts = [
         "-Wno-conversion",
         "-Wno-error=at-protocol",
-        "-I//Pods/Headers/Private",
+        "-I/Headers/Private",
     ],
     swift_copts = [
         "-DDEBUG",
         "-Xcc",
-        "-I//Pods/Headers/Private",
+        "-I/Headers/Private",
     ],
     swift_version = "5.2",
     xcconfig = {
@@ -76,7 +76,7 @@ ios_application(
         "VERSIONING_SYSTEM": "apple-generic",
         "SWIFT_OPTIMIZATION_LEVEL_Debug": "-Onone",
         "SWIFT_OPTIMIZATION_LEVEL_Release": "-Owholemodule",
-        "TEST_PODS_ROOT_ENV_VAR": "//Pods/Testing/Env/Var",
+        "TEST_PODS_ROOT_ENV_VAR": "/Testing/Env/Var",
         "TEST_PODS_TARGET_SRCROOT_ENV_VAR": "Testing/Env/Var",
     },
     xcconfig_by_build_setting = {

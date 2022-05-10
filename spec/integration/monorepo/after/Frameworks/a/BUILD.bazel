@@ -52,12 +52,12 @@ ios_application(
     objc_copts = [
         "-Wno-conversion",
         "-Wno-error=at-protocol",
-        "-I//Pods/Headers/Private",
+        "-I/Headers/Private",
     ],
     swift_copts = [
         "-DDEBUG",
         "-Xcc",
-        "-I//Pods/Headers/Private",
+        "-I/Headers/Private",
     ],
     swift_version = "5.2",
     xcconfig = {

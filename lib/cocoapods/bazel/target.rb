@@ -158,7 +158,6 @@ module Pod
           .to_h
           .merge(
             'CONFIGURATION' => configuration.to_s.capitalize,
-            'PODS_ROOT' => "//#{relative_sandbox_root}",
             'PODS_TARGET_SRCROOT' => ':',
             'SRCROOT' => ':',
             'SDKROOT' => '__BAZEL_XCODE_SDKROOT__'
