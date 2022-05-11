@@ -8,21 +8,15 @@ module Pod
       def resolved_build_setting_value(setting, settings:)
         return unless (value = settings[setting])
 
+        # Removes the : bazel prefix for current directory.
         sub_prefix = ->(s) { s.sub(%r{\A:/}, '') }
-        resolved = resolve_string_with_build_settings(value, settings: settings)
+
+        resolved = Pod::Bazel::Util.resolve_value(value, resolved_values: settings)
         if Pod::Target::BuildSettings::PLURAL_SETTINGS.include?(setting)
           resolved.shellsplit.reject(&:empty?).map(&sub_prefix)
         else
           sub_prefix[resolved]
         end
-      end
-
-      def resolve_string_with_build_settings(string, settings:)
-        return string unless string =~ /\$(?:\{([_a-zA-Z0-0]+?)\}|\(([_a-zA-Z0-0]+?)\))/
-
-        match, key = Regexp.last_match.values_at(0, 1, 2).compact
-        sub = settings.fetch(key, '')
-        resolve_string_with_build_settings(string.gsub(match, sub), settings: settings)
       end
 
       UNRESOLVED_SETTINGS = [
@@ -31,6 +25,7 @@ module Pod
         'OTHER_CFLAGS', # serialized separately as objc_copts
         'OTHER_SWIFT_FLAGS', # serialized separately as swift_copts
         'OTHER_LDFLAGS', # serialized separately as linkopts
+        'PODS_ROOT', # not needed, used to help resolve the Pods root path relative to the current package
         'PODS_TARGET_SRCROOT', # not needed, used to help resolve file references relative to the current package
         'SDKROOT', # not needed since the SDKROOT gets propagated via the apple configuration transition
         'SRCROOT', # not needed, used to help resolve file references relative to the current workspace

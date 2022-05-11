@@ -29,8 +29,8 @@ module Pod
 
       include XCConfigResolver
 
-      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
-      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config
+      attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
+      private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
 
       def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false)
         @installer = installer
@@ -43,6 +43,7 @@ module Pod
         @default_xcconfigs = default_xcconfigs
         @resolved_xconfig_by_config = {}
         @experimental_deps_debug_and_release = experimental_deps_debug_and_release
+        @relative_sandbox_root = installer.sandbox.root.relative_path_from(installer.config.installation_root).to_s
       end
 
       def bazel_label(relative_to: nil)
@@ -57,7 +58,6 @@ module Pod
       end
 
       def build_settings_label(config)
-        relative_sandbox_root = @installer.sandbox.root.relative_path_from(@installer.config.installation_root).to_s
         cocoapods_bazel_path = File.join(relative_sandbox_root, 'cocoapods-bazel')
 
         "//#{cocoapods_bazel_path}:#{config}"
@@ -582,12 +582,31 @@ module Pod
       def test_kwargs
         {
           bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER'),
-          env: pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {}),
+          env: resolve_env(pod_target.scheme_for_spec(non_library_spec).fetch(:environment_variables, {})),
           infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
           infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)),
           minimum_os_version: build_os_version || pod_target.deployment_target_for_non_library_spec(non_library_spec),
           test_host: test_host&.bazel_label(relative_to: package) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
         }
+      end
+
+      # Resolves the given environment by resolving CocoaPod specific environment variables.
+      # Given an environment with unresolved env values, this function resolves them and returns the new env.
+      def resolve_env(env)
+        # These environment variables are resolved by CocoaPods, they tend to be used in tests and other
+        # scripts, as such we must resolve them before translating the targets environment.
+        resolved_cocoapods_env = {
+          'PODS_ROOT' => "//#{relative_sandbox_root}",
+          'PODS_TARGET_SRCROOT' => ':'
+        }.freeze
+
+        # Removes the : bazel prefix for current directory.
+        sub_prefix = ->(s) { s.sub(%r{\A:/}, '') }
+
+        env.each_with_object({}) do |(k, v), resolved_env|
+          resolved_val = Pod::Bazel::Util.resolve_value(v, resolved_values: resolved_cocoapods_env)
+          resolved_env[k] = sub_prefix[resolved_val]
+        end
       end
 
       def build_os_version
