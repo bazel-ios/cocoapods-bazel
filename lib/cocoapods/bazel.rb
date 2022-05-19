@@ -31,7 +31,7 @@ module Pod
               Bazel does not support Pod located outside of current workspace: \"#{package}\".
               To fix this, you can move the Pod into workspace,
               or you can symlink the Pod inside the workspace by running `ln -s <path_to_pod> .` at workspace root
-              Then change path declared in Podfile to `./<pod_name>`
+              Then change path declared in Podfile to `./<pod_name>/<some_pod>.podspec`
               Current workspace: #{workspace}
             MSG
           end
