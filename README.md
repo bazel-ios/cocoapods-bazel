@@ -50,6 +50,16 @@ There are some experimental features that are opt-in and can be enabled adding t
 
 Note that tests for the experimental features are located under `spec/integration/experimental_features` and these should mostly replicate the tests under `spec/integration/monorepo` but with the features on. Also it's a place to create tests specific to a experimental feature that not necessarily will affect the default usage of `cocoapods-bazel`.
 
+## BUILD file formatting
+
+When the `BUILD.bazel` files are generated you may choose to have `cocoapods-bazel` format the files using [buildifier](https://github.com/bazelbuild/buildtools/blob/master/buildifier/README.md). This formatting is enabled by default if a `buildifier` executable is found using `which buildifier`.
+
+You can disable buildifier formatting with `buildifier: false` in the options of the `cocoapods-bazel` plugin.
+
+Additionally, if you'd like to use a custom `buildifier` executable you can provide the `cocoapods-bazel` plugin options with an array of arguments to execute to format files.
+
+For example, if you have `buildifier` runnable target you've defined in Bazel with the name `buildifier` you can run this specific version with: `buildifier: ['bazel', 'run', 'buildifier', '--']`. (Note the `--` allows bazel to forward arguments to the buildifier target).
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/ob/cocoapods-bazel.
