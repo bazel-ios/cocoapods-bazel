@@ -104,11 +104,12 @@ module Pod
       end
 
       def product_module_name
+        root_module_name = pod_target.root_spec.attributes_hash['module_name']
         name = resolved_value_by_build_setting('PRODUCT_MODULE_NAME') || resolved_value_by_build_setting('PRODUCT_NAME') ||
-               if non_library_spec
+               if non_library_spec || root_module_name.nil?
                  label.tr('-', '_')
                else
-                 pod_target.product_module_name
+                 root_module_name
                end
 
         raise 'The product module name must be the same for both debug and release.' unless name.is_a? String

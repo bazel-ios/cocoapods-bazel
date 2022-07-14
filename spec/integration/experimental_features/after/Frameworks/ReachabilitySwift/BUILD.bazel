@@ -1,0 +1,14 @@
+load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
+
+apple_framework(
+    name = "ReachabilitySwift",
+    srcs = glob(["Sources/Reachability.swift"]),
+    module_name = "Reachability",
+    platforms = {"ios": "8.0"},
+    sdk_frameworks = [
+        "CoreTelephony",
+        "SystemConfiguration",
+    ],
+    swift_version = "5.0",
+    visibility = ["//visibility:public"],
+)

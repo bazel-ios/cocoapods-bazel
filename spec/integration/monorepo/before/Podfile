@@ -14,11 +14,10 @@ use_frameworks!
 install! 'cocoapods',
          integrate_targets: false
 
-all_podspecs = Dir['**/*.podspec', base: __dir__] - %w[Frameworks/e/E.podspec]
+all_podspecs = Dir['**/*.podspec', base: __dir__] - %w[Frameworks/e/E.podspec] - %w[Frameworks/Firebase/Firebase.podspec]
 
 target 'App' do
-  platform :ios, '11.0'
-
+  platform :ios, '13.0'
   all_podspecs.each do |podspec|
     spec = Pod::Specification.from_file(File.join(__dir__, podspec))
     subspecs = spec.recursive_subspecs.group_by(&:spec_type)
@@ -29,5 +28,16 @@ target 'App' do
     inherit! :search_paths
 
     pod 'E', path: 'Frameworks/e/E.podspec', testspecs: %w[Tests]
+  end
+
+  target 'FirebaseTest1' do
+    inherit! :search_paths
+    pod 'Firebase/Crashlytics', path: 'Frameworks/Firebase/Firebase.podspec'
+  end
+
+  target 'FirebaseTest2' do
+    inherit! :search_paths
+    pod 'Firebase/Core', path: 'Frameworks/Firebase/Firebase.podspec'
+    pod 'Firebase/RemoteConfig', path: 'Frameworks/Firebase/Firebase.podspec'
   end
 end

@@ -1,0 +1,116 @@
+"""
+Test docstring
+that takes two lines
+"""
+
+load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
+
+apple_framework(
+    name = "FirebaseCore",
+    srcs = glob([
+        "FirebaseCore/Sources/**/*.m",
+        "FirebaseCore/Sources/**/*.h",
+    ]),
+    platforms = {"ios": "9.0"},
+    public_headers = glob(["FirebaseCore/Sources/Public/FirebaseCore/*.h"]),
+    sdk_frameworks = [
+        "Foundation",
+        "UIKit",
+    ],
+    visibility = ["//visibility:public"],
+    xcconfig = {
+        "GCC_C_LANGUAGE_STANDARD": "c99",
+        "GCC_PREPROCESSOR_DEFINITIONS": ["Firebase_VERSION=9.2.0"],
+    },
+)
+
+apple_framework(
+    name = "FirebaseCrashlytics",
+    srcs = glob([
+        "Crashlytics/Crashlytics/**/*.c",
+        "Crashlytics/Crashlytics/**/*.h",
+        "Crashlytics/Crashlytics/**/*.m",
+        "Crashlytics/Crashlytics/**/*.mm",
+    ]),
+    objc_copts = ["-IFrameworks/Firebase"],
+    platforms = {"ios": "9.0"},
+    public_headers = glob([
+        "Crashlytics/Crashlytics/Public/FirebaseCrashlytics/*.h",
+    ]),
+    sdk_dylibs = [
+        "c++",
+        "z",
+    ],
+    sdk_frameworks = [
+        "Security",
+        "SystemConfiguration",
+    ],
+    swift_copts = [
+        "-Xcc",
+        "-IFrameworks/Firebase",
+    ],
+    visibility = ["//visibility:public"],
+    xcconfig = {
+        "GCC_C_LANGUAGE_STANDARD": "c99",
+        "GCC_PREPROCESSOR_DEFINITIONS": [
+            "CLS_SDK_NAME=Crashlytics iOS SDK",
+            "PB_FIELD_32BIT=1",
+            "PB_NO_PACKED_STRUCTS=1",
+            "PB_ENABLE_MALLOC=1",
+        ],
+    },
+    deps = [":FirebaseCore"],
+)
+
+apple_framework(
+    name = "FirebaseRemoteConfig",
+    srcs = glob([
+        "FirebaseRemoteConfig/Sources/**/*.m",
+        "FirebaseRemoteConfig/Sources/**/*.h",
+    ]),
+    objc_copts = ["-IFrameworks/Firebase"],
+    platforms = {"ios": "10.0"},
+    public_headers = glob([
+        "FirebaseRemoteConfig/Sources/Public/FirebaseRemoteConfig/*.h",
+    ]),
+    swift_copts = [
+        "-Xcc",
+        "-IFrameworks/Firebase",
+    ],
+    visibility = ["//visibility:public"],
+    xcconfig = {"GCC_C_LANGUAGE_STANDARD": "c99"},
+    deps = [":FirebaseCore"],
+)
+
+apple_framework(
+    name = "FirebaseRemoteConfigSwift",
+    srcs = glob(["FirebaseRemoteConfigSwift/Sources/*.swift"]),
+    platforms = {"ios": "10.0"},
+    swift_version = "5.3",
+    visibility = ["//visibility:public"],
+    deps = [":FirebaseRemoteConfig"],
+)
+
+apple_framework(
+    name = "Firebase-CoreOnly-Crashlytics",
+    srcs = glob(["CoreOnly/Sources/Firebase.h"]),
+    module_name = "Firebase_CoreOnly_Crashlytics",
+    platforms = {"ios": "9.0"},
+    visibility = ["//visibility:public"],
+    deps = [
+        ":FirebaseCore",
+        ":FirebaseCrashlytics",
+    ],
+)
+
+apple_framework(
+    name = "Firebase-Core-CoreOnly-RemoteConfig",
+    srcs = glob(["CoreOnly/Sources/Firebase.h"]),
+    module_name = "Firebase_Core_CoreOnly_RemoteConfig",
+    platforms = {"ios": "10.0"},
+    visibility = ["//visibility:public"],
+    deps = [
+        ":FirebaseCore",
+        ":FirebaseRemoteConfig",
+    ],
+)
