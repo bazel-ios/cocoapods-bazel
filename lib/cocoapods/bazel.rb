@@ -25,6 +25,10 @@ module Pod
 
         build_files = Hash.new { |h, k| h[k] = StarlarkCompiler::BuildFile.new(workspace: workspace, package: k) }
         installer.pod_targets.each do |pod_target|
+          if config.skip_pods.include? pod_target.pod_name
+            UI.info "Skipping pod #{pod_target.pod_name}"
+            next
+          end
           package = sandbox.pod_dir(pod_target.pod_name).relative_path_from(workspace).to_s
           if package.start_with?('..')
             raise Informative, <<~MSG

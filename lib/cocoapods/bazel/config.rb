@@ -55,7 +55,8 @@ module Pod
         build_file_doc: '',
         features: {
           experimental_deps_debug_and_release: false
-        }
+        },
+        skip_pods: [],
       }.with_indifferent_access.freeze
 
       private_constant :DEFAULTS
@@ -114,6 +115,10 @@ module Pod
 
       def build_file_doc
         to_h[:build_file_doc]
+      end
+
+      def skip_pods
+        to_h[:skip_pods]
       end
     end
   end
