@@ -120,6 +120,10 @@ module Pod
       def skip_pods
         to_h[:skip_pods]
       end
+
+      def overrides
+        to_h[:overrides]
+      end
     end
   end
 end

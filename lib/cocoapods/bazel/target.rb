@@ -32,7 +32,7 @@ module Pod
       attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
       private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
 
-      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false)
+      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false, overrides = {})
         @installer = installer
         @pod_target = pod_target
         @file_accessors = non_library_spec ? pod_target.file_accessors.select { |fa| fa.spec == non_library_spec } : pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
@@ -44,6 +44,7 @@ module Pod
         @resolved_xconfig_by_config = {}
         @experimental_deps_debug_and_release = experimental_deps_debug_and_release
         @relative_sandbox_root = installer.sandbox.root.relative_path_from(installer.config.installation_root).to_s
+        @overrides = overrides
       end
 
       def bazel_label(relative_to: nil)
@@ -121,6 +122,13 @@ module Pod
 
       def uses_swift?
         file_accessors.any? { |fa| fa.source_files.any? { |s| s.extname == '.swift' } }
+      end
+
+      def swift_version?
+        override_swift_version = @overrides.dig(pod_target.name, 'swift_version')
+        return uses_swift? && pod_target.swift_version if override_swift_version.nil?
+
+        override_swift_version
       end
 
       def pod_target_xcconfig_by_build_setting
@@ -291,7 +299,7 @@ module Pod
             .add(:pch, glob(attr: :prefix_header, return_files: true).first, defaults: [nil])
             .add(:data, glob(attr: :resources, exclude_directories: 0), defaults: [[]])
             .add(:resource_bundles, {}, defaults: [{}])
-            .add(:swift_version, uses_swift? && pod_target.swift_version, defaults: [nil, false])
+            .add(:swift_version, swift_version?, defaults: [nil, false])
             .add(:swift_objc_bridging_header, swift_objc_bridging_header, defaults: [nil])
 
           # xcconfigs
