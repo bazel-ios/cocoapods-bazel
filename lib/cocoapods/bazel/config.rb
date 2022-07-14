@@ -56,7 +56,7 @@ module Pod
         features: {
           experimental_deps_debug_and_release: false
         },
-        skip_pods: [],
+        skip_pods: [].freeze,
       }.with_indifferent_access.freeze
 
       private_constant :DEFAULTS
