@@ -52,6 +52,7 @@ ios_application(
     minimum_os_version = "11.0",
     module_name = "G_App",
     swift_version = "5.2",
+    visibility = ["//visibility:public"],
     deps = [
         ":G",
         "//Frameworks/a:A",

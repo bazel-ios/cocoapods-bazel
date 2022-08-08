@@ -32,5 +32,6 @@ ios_application(
     minimum_os_version = "9.0",
     module_name = "EsotericGlobs_App",
     swift_version = "5.2",
+    visibility = ["//visibility:public"],
     deps = [":EsotericGlobs"],
 )

@@ -55,6 +55,7 @@ ios_application(
         "-I/Headers/Private",
     ],
     swift_version = "5.2",
+    visibility = ["//visibility:public"],
     xcconfig = {
         "ARCHS": [
             "arm64",

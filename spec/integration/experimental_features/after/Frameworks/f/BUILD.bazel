@@ -47,5 +47,6 @@ ios_application(
     minimum_os_version = "11.0",
     module_name = "F_App",
     swift_version = "5.2",
+    visibility = ["//visibility:public"],
     deps = [":F"],
 )

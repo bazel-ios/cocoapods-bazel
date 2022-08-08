@@ -62,6 +62,7 @@ ios_application(
     minimum_os_version = "9.0",
     module_name = "D_App",
     swift_version = "5.2",
+    visibility = ["//visibility:public"],
     xcconfig = {
         "TARGETED_DEVICE_FAMILY": "2",
         "SWIFT_PLATFORM_TARGET_PREFIX": "ios",

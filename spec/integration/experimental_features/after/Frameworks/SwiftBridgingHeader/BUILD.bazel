@@ -44,6 +44,7 @@ ios_application(
     module_name = "SwiftBridgingHeader_App",
     swift_objc_bridging_header = "App/BridgingHeader.h",
     swift_version = "5.2",
+    visibility = ["//visibility:public"],
     xcconfig = {"SWIFT_OBJC_BRIDGING_HEADER": "App/BridgingHeader.h"},
     deps = [":SwiftBridgingHeader"],
 )

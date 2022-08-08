@@ -84,6 +84,7 @@ ios_application(
         ],
     }),
     swift_version = "5.2",
+    visibility = ["//visibility:public"],
     xcconfig = {
         "HEADER_SEARCH_PATHS_Debug": "/Headers/Private/Debug",
         "HEADER_SEARCH_PATHS_Release": "/Headers/Private/Release",
@@ -152,6 +153,7 @@ ios_application(
         ],
     }),
     swift_version = "5.2",
+    visibility = ["//visibility:public"],
     xcconfig = {
         "HEADER_SEARCH_PATHS_Debug": "/Headers/Private/Debug",
         "HEADER_SEARCH_PATHS_Release": "/Headers/Private/Release",
