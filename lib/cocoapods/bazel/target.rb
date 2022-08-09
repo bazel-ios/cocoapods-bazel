@@ -652,7 +652,8 @@ module Pod
           settings_bundle: [],
           strings: [],
           version: [],
-          watch_application: []
+          watch_application: [],
+          visibility: ['//visibility:public']
         }
 
         # If the user has set a different build os set that here
