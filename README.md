@@ -2,7 +2,9 @@
 ![](https://github.com/ob/cocoapods-bazel/workflows/master/badge.svg)
 
 
-Cocoapods::Bazel is a Cocoapods plugin that makes it easy to use [Bazel](https://bazel.build) instead of Xcode to build your iOS project. It automatically generates Bazel's `BUILD.bazel` files. It uses [`rules_ios`](https://github.com/ob/rules_ios) so you need to set up the `WORKSPACE` file following the instructions in the [`README`](https://github.com/ob/rules_ios/blob/master/README.md).
+Cocoapods::Bazel is a Cocoapods plugin that makes it easy to use [Bazel](https://bazel.build) instead of Xcode to build your iOS project. It automatically generates Bazel's `BUILD` files.
+
+`cocoapods-bazel` can be setup to translate CocoaPod targets to provided Bazel rules. For example, you can use `cocaopods-bazel` to load framework targets using [rules_ios](https://github.com/bazel-ios/rules_ios). It's also flexible enough to allow users to use their own custom rules if needed.
 
 > :warning: **This is alpha software.** We are developing this plugin in the open so you should only use it if you know what you are doing and are willing to help develop it.
 
@@ -16,19 +18,23 @@ gem 'cocoapods-bazel'
 
 And then execute:
 
-    $ bundle
+```sh
+bundle install
+```
 
 Or install it yourself as:
 
-    $ gem install cocoapods-bazel
+```sh
+gem install cocoapods-bazel
+```
 
 ## Usage
 
-This plugin will run extra steps after post_install to generate BUILD.bazel files for Bazel.
+This plugin will run extra steps after post_install to generate `BUILD` files for Bazel.
 
-To enable the plugin, simply add the following section to your `Podfile`
+To enable the plugin, you can add something like the following section to your `Podfile`:
 
-```
+```ruby
 plugin 'cocoapods-bazel', {
   rules: {
     'apple_framework' => { load: '@build_bazel_rules_ios//rules:framework.bzl', rule: 'apple_framework' }.freeze,
@@ -62,7 +68,7 @@ For example, if you have `buildifier` runnable target you've defined in Bazel wi
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/ob/cocoapods-bazel.
+Bug reports and pull requests are welcome on GitHub [here](https://github.com/bazel-ios/cocoapods-bazel).
 
 ## License
 
