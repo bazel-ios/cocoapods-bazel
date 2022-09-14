@@ -20,7 +20,7 @@ Pod::Spec.new do |s|
   }
 
   s.test_spec 'Tests' do |ts|
-    ts.source_files = 'Tests/**/*.{h,m,swift}'
+    ts.source_files = 'Tests/**/*.{m,swift}'
     ts.pod_target_xcconfig = {
       'TEST_PODS_ROOT_ENV_VAR' => "${PODS_ROOT}/Testing/Env/Var",
       'TEST_PODS_TARGET_SRCROOT_ENV_VAR' => "${PODS_TARGET_SRCROOT}/Testing/Env/Var"
@@ -34,7 +34,7 @@ Pod::Spec.new do |s|
   end
 
   s.app_spec 'App' do |as|
-    as.source_files = 'App/**/*.{h,m,swift}'
+    as.source_files = 'App/**/*.swift'
 
     as.pod_target_xcconfig = {
       'ARCHS' => 'arm64 x86',

@@ -26,7 +26,6 @@ apple_framework(
 ios_unit_test(
     name = "E-Unit-Tests",
     srcs = glob([
-        "Tests/**/*.h",
         "Tests/**/*.m",
         "Tests/**/*.swift",
     ]),

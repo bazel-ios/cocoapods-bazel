@@ -10,7 +10,6 @@ apple_framework(
     srcs = glob([
         "Sources/**/*.h",
         "Sources/**/*.m",
-        "Sources/**/*.swift",
     ]),
     objc_copts = [
         "-IFrameworks/CustomHeaderSearchPaths/Sources",

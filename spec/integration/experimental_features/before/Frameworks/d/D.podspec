@@ -24,7 +24,7 @@ Pod::Spec.new do |s|
     ts.app_host_name = 'D/App'
     ts.dependency 'D/App'
 
-    ts.source_files = 'Tests/**/*.{h,m,swift}'
+    ts.source_files = 'Tests/**/*.{m,swift}'
 
     ts.dependency 'E'
 
@@ -35,7 +35,7 @@ Pod::Spec.new do |s|
   end
 
   s.app_spec 'App' do |as|
-    as.source_files = 'App/**/*.{h,m,swift}'
+    as.source_files = 'App/**/*.swift'
 
     as.pod_target_xcconfig = {
       'TARGETED_DEVICE_FAMILY' => '2',

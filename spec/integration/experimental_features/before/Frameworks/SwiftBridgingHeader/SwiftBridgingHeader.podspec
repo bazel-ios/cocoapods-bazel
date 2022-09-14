@@ -13,17 +13,16 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '9.0'
 
   s.source_files = 'Sources/**/*.{h,m,swift}'
-  s.private_header_files = 'Sources/Internal/**/*.h'
 
   s.test_spec 'Tests' do |ts|
-    ts.source_files = 'Tests/**/*.{m,swift}'
+    ts.source_files = 'Tests/**/*.{h,m,swift}'
     ts.pod_target_xcconfig = {
       'SWIFT_OBJC_BRIDGING_HEADER' => '${PODS_TARGET_SRCROOT}/Tests/BridgingHeader.h',
     }
   end
 
   s.app_spec 'App' do |as|
-    as.source_files = 'App/**/*.{m,swift}'
+    as.source_files = 'App/**/*.{h,swift}'
     as.pod_target_xcconfig = {
       'SWIFT_OBJC_BRIDGING_HEADER' => '${PODS_TARGET_SRCROOT}/App/BridgingHeader.h',
     }

@@ -19,7 +19,6 @@ apple_framework(
 ios_unit_test(
     name = "B-Unit-Tests",
     srcs = glob([
-        "Tests/**/*.h",
         "Tests/**/*.m",
         "Tests/**/*.swift",
     ]),
@@ -43,11 +42,7 @@ ios_unit_test(
 
 ios_application(
     name = "B-App",
-    srcs = glob([
-        "App/**/*.h",
-        "App/**/*.m",
-        "App/**/*.swift",
-    ]),
+    srcs = glob(["App/**/*.swift"]),
     bundle_id = select({
         "//Pods/cocoapods-bazel:debug": "org.cocoapods.B-App.Debug",
         "//Pods/cocoapods-bazel:release": "org.cocoapods.B-App",
@@ -112,11 +107,7 @@ ios_application(
 
 ios_application(
     name = "B-DebuggableOnlyApp",
-    srcs = glob([
-        "App/**/*.h",
-        "App/**/*.m",
-        "App/**/*.swift",
-    ]),
+    srcs = glob(["App/**/*.swift"]),
     bundle_id = select({
         "//Pods/cocoapods-bazel:debug": "org.cocoapods.B-DebuggableOnlyApp.Debug",
         "//Pods/cocoapods-bazel:release": "org.cocoapods.B-DebuggableOnlyApp",
