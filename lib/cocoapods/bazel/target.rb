@@ -532,25 +532,34 @@ module Pod
         elsif extensions && File.extname(glob).empty?
           glob = glob.chomp('**/*') # If we reach here and the glob ends with **/*, we need to avoid duplicating it (we do not want to end up with **/*/**/*)
           if File.basename(glob) == '*'
-            extensions.map { |ext| "#{glob}.#{ext}" }
+            extensions.map do |ext|
+              combined = "#{glob}.#{ext}"
+              combined if Dir.glob(File.join(@package_dir, combined)).any?
+            end.compact
           else
             extensions.map do |ext|
-              File.join(glob, '**', "*.#{ext}")
-            end
+              combined = File.join(glob, '**', "*.#{ext}")
+              combined if Dir.glob(File.join(@package_dir, combined)).any?
+            end.compact
           end
         elsif expand_directories
           if glob.end_with?('/**/*')
-            [glob]
+            glob_with_valid_matches(glob)
           elsif glob.end_with?('/*')
             [glob.sub(%r{/\*$}, '/**/*')]
           elsif should_skip_directory_expansion(glob)
-            [glob]
+            glob_with_valid_matches(glob)
           else
             [glob.chomp('/') + '/**/*']
           end
         else
-          [glob]
+          glob_with_valid_matches(glob)
         end
+      end
+
+      # Returns `[glob]` if the given pattern has at least 1 match on disk, otherwise returns an empty array
+      def glob_with_valid_matches(glob)
+        Dir.glob(File.join(@package_dir, glob)).any? ? [glob] : []
       end
 
       # We should expand only folder globs, not expand file globs.
