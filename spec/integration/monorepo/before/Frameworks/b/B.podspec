@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
   s.dependency 'A'
 
   s.test_spec 'Tests' do |ts|
-    ts.source_files = 'Tests/**/*.{h,m,swift}'
+    ts.source_files = 'Tests/**/*.{m,swift}'
     ts.pod_target_xcconfig = {
       'PRODUCT_BUNDLE_IDENTIFIER' => '$(PRODUCT_BUNDLE_IDENTIFIER_$(CONFIGURATION))',
       'PRODUCT_BUNDLE_IDENTIFIER_Debug' => 'org.cocoapods.B-Test.Debug',
@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
   end
 
   s.app_spec 'App' do |as|
-    as.source_files = 'App/**/*.{h,m,swift}'
+    as.source_files = 'App/**/*.swift'
     as.pod_target_xcconfig = {
       'HEADER_SEARCH_PATHS' => '$(HEADER_SEARCH_PATHS_$(CONFIGURATION))',
       'HEADER_SEARCH_PATHS_Debug' => '${PODS_ROOT}/Headers/Private/Debug',
@@ -47,7 +47,7 @@ Pod::Spec.new do |s|
 
 
   s.app_spec 'DebuggableOnlyApp' do |as|
-    as.source_files = 'App/**/*.{h,m,swift}'
+    as.source_files = 'App/**/*.swift'
     as.pod_target_xcconfig = {
       'HEADER_SEARCH_PATHS' => '$(HEADER_SEARCH_PATHS_$(CONFIGURATION))',
       'HEADER_SEARCH_PATHS_Debug' => '${PODS_ROOT}/Headers/Private/Debug',

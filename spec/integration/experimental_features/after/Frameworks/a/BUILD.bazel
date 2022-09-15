@@ -19,7 +19,6 @@ apple_framework(
 ios_unit_test(
     name = "A-Unit-Tests",
     srcs = glob([
-        "Tests/**/*.h",
         "Tests/**/*.m",
         "Tests/**/*.swift",
     ]),
@@ -31,11 +30,7 @@ ios_unit_test(
 
 ios_application(
     name = "A-App",
-    srcs = glob([
-        "App/**/*.h",
-        "App/**/*.m",
-        "App/**/*.swift",
-    ]),
+    srcs = glob(["App/**/*.swift"]),
     bundle_id = "org.cocoapods.A-App",
     families = [
         "iphone",

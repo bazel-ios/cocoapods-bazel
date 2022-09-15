@@ -20,10 +20,10 @@ Pod::Spec.new do |s|
   s.dependency 'OneTrust-CMP-XCFramework'
 
   s.test_spec 'Tests' do |ts|
-    ts.source_files = 'Tests/**/*.{h,m,swift}'
+    ts.source_files = 'Tests/**/*.{m,swift}'
   end
 
   s.app_spec 'App' do |as|
-    as.source_files = 'App/**/*.{h,m,swift}'
+    as.source_files = 'App/**/*.swift'
   end
 end

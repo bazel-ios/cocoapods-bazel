@@ -10,7 +10,6 @@ apple_framework(
         "Sources/**/*.swift",
     ]),
     platforms = {"ios": "9.0"},
-    private_headers = glob(["Sources/Internal/**/*.h"]),
     swift_version = "5.2",
     visibility = ["//visibility:public"],
 )
@@ -18,6 +17,7 @@ apple_framework(
 ios_unit_test(
     name = "SwiftBridgingHeader-Unit-Tests",
     srcs = glob([
+        "Tests/**/*.h",
         "Tests/**/*.m",
         "Tests/**/*.swift",
     ]),
@@ -32,7 +32,7 @@ ios_unit_test(
 ios_application(
     name = "SwiftBridgingHeader-App",
     srcs = glob([
-        "App/**/*.m",
+        "App/**/*.h",
         "App/**/*.swift",
     ]),
     bundle_id = "org.cocoapods.SwiftBridgingHeader-App",

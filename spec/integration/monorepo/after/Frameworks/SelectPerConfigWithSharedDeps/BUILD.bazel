@@ -30,7 +30,6 @@ apple_framework(
 ios_unit_test(
     name = "SelectPerConfigWithSharedDeps-Unit-Tests",
     srcs = glob([
-        "Tests/**/*.h",
         "Tests/**/*.m",
         "Tests/**/*.swift",
     ]),
@@ -42,11 +41,7 @@ ios_unit_test(
 
 ios_application(
     name = "SelectPerConfigWithSharedDeps-App",
-    srcs = glob([
-        "App/**/*.h",
-        "App/**/*.m",
-        "App/**/*.swift",
-    ]),
+    srcs = glob(["App/**/*.swift"]),
     bundle_id = "org.cocoapods.SelectPerConfigWithSharedDeps-App",
     families = [
         "iphone",
