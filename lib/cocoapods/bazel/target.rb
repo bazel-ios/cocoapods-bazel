@@ -374,6 +374,9 @@ module Pod
         kwargs[:runtime_deps] = []
         kwargs[:sdk_dylibs] = file_accessors.flat_map { |fa| fa.spec_consumer.libraries }.sort.uniq
         kwargs[:sdk_frameworks] = file_accessors.flat_map { |fa| fa.spec_consumer.frameworks }.sort.uniq
+        if kwargs[:sdk_frameworks].include? 'XCTest'
+          kwargs[:testonly] = true
+        end
         kwargs[:sdk_includes] = []
         kwargs[:weak_sdk_frameworks] = file_accessors.flat_map { |fa| fa.spec_consumer.weak_frameworks }.sort.uniq
 
