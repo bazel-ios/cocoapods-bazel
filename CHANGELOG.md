@@ -1,3 +1,6 @@
+0.1.5
+* Add `testonly` to targets that link with XCTest (#82)
+ 
 0.1.4
 
 * Fix issues with glob evaluation (#64, #65)
