@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler', '>= 2.1'
 
-  spec.add_runtime_dependency 'starlark_compiler', '~> 0.3'
+  spec.add_runtime_dependency 'starlark_compiler', '~> 0.5'
 
   spec.required_ruby_version = '>= 2.6'
 end
