@@ -1,3 +1,44 @@
+# Discord Fork: Cocoapods::Bazel
+
+This is our Discord-specific fork of [Cocoapods-Bazel](https://github.com/bazel-ios/cocoapods-bazel).
+
+- We use the `discord` branch as our main branch, the `master` branch should mirror `master` from upstream.
+
+## Local development against the monorepo
+You can configure your iOS builds in the [monorepo](https://github.com/discord/discord) to use a local checkout of this
+repository for local development:
+
+1. Open `discord_ios/Gemfile` in your monorepo checkout.
+2. Comment out the existing cocoapods-bazel gem line and add a new one below:
+   ```rb
+   # gem 'cocoapods-bazel', :github => 'discord/cocoapods-bazel', :ref => '722c9398ac628943e4084eaebfcec0e85f536663'
+   gem 'cocoapods-bazel', path: '/path/to/cocoapods-bazel'
+   ```
+3. Open an iOS Nix shell and run `bundle lock` to update `Gemfile.lock`:
+   ```sh
+   $ clyde nix shell -A iosShell
+   $ cd discord_ios
+   $ bundle lock
+   ```
+4. Don't forget to revert the changes to `Gemfile` and `Gemfile.lock` before making your PR!
+
+## Updating the monorepo after merging a PR
+After merging a PR to this repository, you must update the monorepo to point to the new commit:
+
+1. Copy the latest commit hash that the `discord` branch is pointing to after you landed your PR.
+2. Open `discord_ios/Gemfile` in your monorepo checkout.
+3. Update the `:ref` attribute for the `cocoapods-bazel` gem to the new hash:
+   ```rb
+   gem 'cocoapods-bazel', :github => 'discord/cocoapods-bazel', :ref => '[NEW COMMIT HASH GOES HERE]'
+   ```
+4. Open an iOS Nix shell and run `bundle lock` to update `Gemfile.lock`:
+   ```sh
+   $ clyde nix shell -A iosShell
+   $ cd discord_ios
+   $ bundle lock
+   ```
+5. Verify `clyde ios sync-pods` and an iOS build still works, and commit your changes.
+
 # Cocoapods::Bazel
 ![](https://github.com/ob/cocoapods-bazel/workflows/master/badge.svg)
 
