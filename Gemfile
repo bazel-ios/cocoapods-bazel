@@ -11,4 +11,5 @@ gem 'rake', '~> 12.3'
 gem 'rspec', '~> 3.9'
 gem 'rubocop', '~> 0.78'
 
-gem 'cocoapods', '~> 1.9'
+gem 'cocoapods', :path => '../CocoaPods'
+gem 'starlark_compiler', :path => '../starlark_compiler'

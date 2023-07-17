@@ -5,6 +5,7 @@ require 'cocoapods/bazel/config'
 require 'cocoapods/bazel/target'
 require 'cocoapods/bazel/xcconfig_resolver'
 require 'cocoapods/bazel/util'
+require 'cocoapods/bazel/exportFile'
 
 module Pod
   module Bazel
@@ -21,10 +22,13 @@ module Pod
         sandbox = installer.sandbox
 
         # Ensure we declare the sandbox (Pods/) as a package so each Pod (as a package) belongs to sandbox root package instead
-        FileUtils.touch(File.join(installer.config.sandbox_root, 'BUILD.bazel'))
+        rootBazelFilePath = File.join(installer.config.sandbox_root, 'BUILD.bazel')
+        FileUtils.touch(rootBazelFilePath)
 
         build_files = Hash.new { |h, k| h[k] = StarlarkCompiler::BuildFile.new(workspace: workspace, package: k) }
+        exportFile = ExportFile.new(rootBazelFilePath)
         installer.pod_targets.each do |pod_target|
+          exportFile.add(pod_target.info_plist_path.to_s.delete_prefix! sandbox.root.to_s + "/")
           package = sandbox.pod_dir(pod_target.pod_name).relative_path_from(workspace).to_s
           if package.start_with?('..')
             raise Informative, <<~MSG
@@ -44,7 +48,8 @@ module Pod
               pod_target,
               fa.spec,
               default_xcconfigs,
-              config.experimental_deps_debug_and_release
+              config.experimental_deps_debug_and_release,
+              sandbox
             )
           end
 
@@ -53,7 +58,8 @@ module Pod
             pod_target,
             nil,
             default_xcconfigs,
-            config.experimental_deps_debug_and_release
+            config.experimental_deps_debug_and_release,
+            sandbox
           )
 
           bazel_targets = [default_target] + targets_without_library_specification
@@ -64,6 +70,8 @@ module Pod
             build_file.add_target StarlarkCompiler::AST::FunctionCall.new(load[:rule], **t.to_rule_kwargs)
           end
         end
+
+        exportFile.save
 
         build_files.each_value(&:save!)
         format_files(build_files: build_files, buildifier: config.buildifier, workspace: workspace)

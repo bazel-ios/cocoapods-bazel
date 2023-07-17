@@ -32,7 +32,7 @@ module Pod
       attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
       private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
 
-      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false)
+      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false, sandbox)
         @installer = installer
         @pod_target = pod_target
         @file_accessors = non_library_spec ? pod_target.file_accessors.select { |fa| fa.spec == non_library_spec } : pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
@@ -44,6 +44,7 @@ module Pod
         @resolved_xconfig_by_config = {}
         @experimental_deps_debug_and_release = experimental_deps_debug_and_release
         @relative_sandbox_root = installer.sandbox.root.relative_path_from(installer.config.installation_root).to_s
+        @sandbox = sandbox
       end
 
       def bazel_label(relative_to: nil)
@@ -99,7 +100,7 @@ module Pod
             raise "Unhandled: #{non_library_spec.spec_type}"
           end
 
-        targets.transform_values { |v| v.uniq.map { |target| self.class.new(installer, target) } }
+        targets.transform_values { |v| v.uniq.map { |target| self.class.new(installer, target, @sandbox) } }
       end
 
       def product_module_name
@@ -396,6 +397,16 @@ module Pod
         when nil
           kwargs.merge!(framework_kwargs)
         end
+        # framework_kwargs is not returning parameters for frameworks
+        # patching here
+        # If Pods are using frameworks set proper parameters for dynamic frameworks
+        if installer.podfile.target_definitions["Pods"].uses_frameworks?
+          kwargs[:link_dynamic] = true
+          infoplistFilePath = pod_target.info_plist_path.to_s.delete_prefix! @sandbox.root.to_s + "/"
+          kwargs[:infoplists] = ["//Pods:" + infoplistFilePath]
+          kwargs[:xcconfig] = {"PODS_DEVELOPMENT_LANGUAGE" => "${DEVELOPMENT_LANGUAGE}", 
+          "CURRENT_PROJECT_VERSION" => "1"}
+        end
 
         defaults = self.defaults
         kwargs.delete_if { |k, v| defaults[k] == v }
@@ -583,7 +594,7 @@ module Pod
         library_spec = pod_target.file_accessors.find { |fa| fa.spec.library_specification? }.spec
         {
           visibility: ['//visibility:public'],
-          bundle_id: resolved_value_by_build_setting('PRODUCT_BUNDLE_IDENTIFIER'),
+          bundle_id: "com.cocoapods.#{pod_target}",
           infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
           infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(library_spec.consumer(pod_target.platform).info_plist)),
           platforms: { rules_ios_platform_name(pod_target.platform) => build_os_version || pod_target.platform.deployment_target.to_s }
