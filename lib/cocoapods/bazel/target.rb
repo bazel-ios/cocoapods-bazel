@@ -400,12 +400,17 @@ module Pod
         # framework_kwargs is not returning parameters for frameworks
         # patching here
         # If Pods are using frameworks set proper parameters for dynamic frameworks
-        if installer.podfile.target_definitions["Pods"].uses_frameworks?
+        if installer.podfile.target_definitions['Pods'].uses_frameworks? &&
+          kwargs[:vendored_static_frameworks].empty? && 
+          kwargs[:vendored_dynamic_frameworks].empty? && 
+          kwargs[:vendored_static_libraries].empty? && 
+          kwargs[:vendored_dynamic_libraries].empty? && 
+          kwargs[:vendored_xcframeworks].empty?
           kwargs[:link_dynamic] = true
-          infoplistFilePath = pod_target.info_plist_path.to_s.delete_prefix! @sandbox.root.to_s + "/"
-          kwargs[:infoplists] = ["//Pods:" + infoplistFilePath]
-          kwargs[:xcconfig] = {"PODS_DEVELOPMENT_LANGUAGE" => "${DEVELOPMENT_LANGUAGE}", 
-          "CURRENT_PROJECT_VERSION" => "1"}
+          infoplistFilePath = pod_target.info_plist_path.to_s.delete_prefix! @sandbox.root.to_s + '/'
+          kwargs[:infoplists] = ['//Pods:' + infoplistFilePath]
+          kwargs[:xcconfig] = { 'PODS_DEVELOPMENT_LANGUAGE' => '${DEVELOPMENT_LANGUAGE}',
+                                'CURRENT_PROJECT_VERSION' => '1' }
         end
 
         defaults = self.defaults
@@ -534,7 +539,7 @@ module Pod
       end
 
       def expand_glob(glob, extensions: nil, expand_directories: false)
-        if (m = glob.match(/\{([^\{\}]+)\}/))
+        if (m = glob.match(/\{([^{}]+)\}/))
           m[1].split(',').flat_map do |alt|
             expand_glob("#{m.pre_match}#{alt.strip}#{m.post_match}", extensions: extensions, expand_directories: expand_directories)
           end.uniq
@@ -643,9 +648,10 @@ module Pod
           version_number = llvm_target_triple_os_version.match(/\d.*/)
           clang_build_os_version = version_number.to_s if version_number
         end
-        if !swift_deployment_target.nil? && !clang_build_os_version.nil?
-          raise "warning: had different os versions #{swift_deployment_target} #{clang_build_os_version}" if swift_deployment_target != clang_build_os_version
+        if !swift_deployment_target.nil? && !clang_build_os_version.nil? && (swift_deployment_target != clang_build_os_version)
+          raise "warning: had different os versions #{swift_deployment_target} #{clang_build_os_version}"
         end
+
         swift_deployment_target || clang_build_os_version
       end
 
