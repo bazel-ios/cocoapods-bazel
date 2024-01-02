@@ -25,6 +25,8 @@ module Pod
 
         build_files = Hash.new { |h, k| h[k] = StarlarkCompiler::BuildFile.new(workspace: workspace, package: k) }
         installer.pod_targets.each do |pod_target|
+          next if config.experimental_exclude_pods.include?(pod_target.pod_name)
+
           package = sandbox.pod_dir(pod_target.pod_name).relative_path_from(workspace).to_s
           if package.start_with?('..')
             raise Informative, <<~MSG
@@ -44,7 +46,9 @@ module Pod
               pod_target,
               fa.spec,
               default_xcconfigs,
-              config.experimental_deps_debug_and_release
+              config.experimental_deps_debug_and_release,
+              config.experimental_exclude_pods,
+              config.experimental_deps_suffix
             )
           end
 
@@ -53,7 +57,9 @@ module Pod
             pod_target,
             nil,
             default_xcconfigs,
-            config.experimental_deps_debug_and_release
+            config.experimental_deps_debug_and_release,
+            config.experimental_exclude_pods,
+            config.experimental_deps_suffix
           )
 
           bazel_targets = [default_target] + targets_without_library_specification

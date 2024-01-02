@@ -7,8 +7,15 @@ source 'https://github.com/CocoaPods/Specs.git'
 plugin(
   'cocoapods-bazel',
   features: {
-    experimental_deps_debug_and_release: true
-  }
+    experimental_deps_debug_and_release: true,
+    experimental_exclude_pods: %w[ExcludedPod],
+    experimental_deps_suffix: '.lib',
+  },
+  rules: {
+    'apple_framework' => { load: '//:rules.bzl', rule: 'apple_framework' }.freeze,
+    'ios_application' => { load: '//:rules.bzl', rule: 'ios_application' }.freeze,
+    'ios_unit_test' => { load: '//:rules.bzl', rule: 'ios_unit_test' }.freeze
+  }.freeze,
 )
 
 use_frameworks!

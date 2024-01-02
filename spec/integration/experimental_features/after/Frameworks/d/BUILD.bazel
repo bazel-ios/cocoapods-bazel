@@ -1,6 +1,9 @@
-load("@build_bazel_rules_ios//rules:app.bzl", "ios_application")
-load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
-load("@build_bazel_rules_ios//rules:test.bzl", "ios_unit_test")
+load(
+    "//:rules.bzl",
+    "apple_framework",
+    "ios_application",
+    "ios_unit_test",
+)
 
 apple_framework(
     name = "D",
@@ -14,9 +17,9 @@ apple_framework(
     swift_version = "5.2",
     visibility = ["//visibility:public"],
     deps = [
-        "//Frameworks/a:A",
-        "//Frameworks/c:C",
-        "//Pods/Public",
+        "//Frameworks/a:A.lib",
+        "//Frameworks/c:C.lib",
+        "//Pods/Public:Public.lib",
     ],
 )
 
@@ -29,10 +32,10 @@ ios_unit_test(
     minimum_os_version = "11.0",
     module_name = "D_Unit_Tests",
     swift_version = "5.2",
-    test_host = ":D-App",
+    test_host = ":D-App.lib",
     deps = [
-        ":D",
-        "//Frameworks/e:E",
+        ":D.lib",
+        "//Frameworks/e:E.lib",
     ],
 )
 
@@ -52,5 +55,5 @@ ios_application(
         "SWIFT_DEPLOYMENT_TARGET": "9.0",
         "LLVM_TARGET_TRIPLE_OS_VERSION": "ios9.0",
     },
-    deps = [":D"],
+    deps = [":D.lib"],
 )

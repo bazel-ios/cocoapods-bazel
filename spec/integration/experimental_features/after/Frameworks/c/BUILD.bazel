@@ -1,6 +1,9 @@
-load("@build_bazel_rules_ios//rules:app.bzl", "ios_application")
-load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
-load("@build_bazel_rules_ios//rules:test.bzl", "ios_unit_test")
+load(
+    "//:rules.bzl",
+    "apple_framework",
+    "ios_application",
+    "ios_unit_test",
+)
 
 apple_framework(
     name = "C",
@@ -14,9 +17,9 @@ apple_framework(
     swift_version = "5.2",
     visibility = ["//visibility:public"],
     deps = [
-        "//Frameworks/a:A",
-        "//Frameworks/b:B",
-        "//Pods/OneTrust-CMP-XCFramework",
+        "//Frameworks/a:A.lib",
+        "//Frameworks/b:B.lib",
+        "//Pods/OneTrust-CMP-XCFramework:OneTrust-CMP-XCFramework.lib",
     ],
 )
 
@@ -29,7 +32,7 @@ ios_unit_test(
     minimum_os_version = "11.0",
     module_name = "C_Unit_Tests",
     swift_version = "5.2",
-    deps = [":C"],
+    deps = [":C.lib"],
 )
 
 ios_application(
@@ -44,5 +47,5 @@ ios_application(
     module_name = "C_App",
     swift_version = "5.2",
     visibility = ["//visibility:public"],
-    deps = [":C"],
+    deps = [":C.lib"],
 )

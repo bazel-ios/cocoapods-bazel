@@ -1,6 +1,9 @@
-load("@build_bazel_rules_ios//rules:app.bzl", "ios_application")
-load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
-load("@build_bazel_rules_ios//rules:test.bzl", "ios_unit_test")
+load(
+    "//:rules.bzl",
+    "apple_framework",
+    "ios_application",
+    "ios_unit_test",
+)
 
 apple_framework(
     name = "SelectPerConfigWithSharedDeps",
@@ -14,15 +17,15 @@ apple_framework(
     swift_version = "5.2",
     visibility = ["//visibility:public"],
     deps = select({
-        "//Pods/cocoapods-bazel:deps_debug": ["//Pods/OnlyPre"],
-        "//Pods/cocoapods-bazel:deps_release": ["//Frameworks/d:D"],
+        "//Pods/cocoapods-bazel:deps_debug": ["//Pods/OnlyPre:OnlyPre.lib"],
+        "//Pods/cocoapods-bazel:deps_release": ["//Frameworks/d:D.lib"],
         "//Pods/cocoapods-bazel:deps_debug_and_release": [
-            "//Frameworks/d:D",
-            "//Pods/OnlyPre",
+            "//Frameworks/d:D.lib",
+            "//Pods/OnlyPre:OnlyPre.lib",
         ],
     }) + [
-        "//Frameworks/a:A",
-        "//Frameworks/c:C",
+        "//Frameworks/a:A.lib",
+        "//Frameworks/c:C.lib",
     ],
 )
 
@@ -35,7 +38,7 @@ ios_unit_test(
     minimum_os_version = "9.0",
     module_name = "SelectPerConfigWithSharedDeps_Unit_Tests",
     swift_version = "5.2",
-    deps = [":SelectPerConfigWithSharedDeps"],
+    deps = [":SelectPerConfigWithSharedDeps.lib"],
 )
 
 ios_application(
@@ -50,5 +53,5 @@ ios_application(
     module_name = "SelectPerConfigWithSharedDeps_App",
     swift_version = "5.2",
     visibility = ["//visibility:public"],
-    deps = [":SelectPerConfigWithSharedDeps"],
+    deps = [":SelectPerConfigWithSharedDeps.lib"],
 )

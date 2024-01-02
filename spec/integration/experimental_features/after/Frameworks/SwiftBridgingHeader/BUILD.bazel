@@ -1,6 +1,9 @@
-load("@build_bazel_rules_ios//rules:app.bzl", "ios_application")
-load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
-load("@build_bazel_rules_ios//rules:test.bzl", "ios_unit_test")
+load(
+    "//:rules.bzl",
+    "apple_framework",
+    "ios_application",
+    "ios_unit_test",
+)
 
 apple_framework(
     name = "SwiftBridgingHeader",
@@ -26,7 +29,7 @@ ios_unit_test(
     swift_objc_bridging_header = "Tests/BridgingHeader.h",
     swift_version = "5.2",
     xcconfig = {"SWIFT_OBJC_BRIDGING_HEADER": "Tests/BridgingHeader.h"},
-    deps = [":SwiftBridgingHeader"],
+    deps = [":SwiftBridgingHeader.lib"],
 )
 
 ios_application(
@@ -46,5 +49,5 @@ ios_application(
     swift_version = "5.2",
     visibility = ["//visibility:public"],
     xcconfig = {"SWIFT_OBJC_BRIDGING_HEADER": "App/BridgingHeader.h"},
-    deps = [":SwiftBridgingHeader"],
+    deps = [":SwiftBridgingHeader.lib"],
 )

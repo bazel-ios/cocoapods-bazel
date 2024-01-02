@@ -40,7 +40,19 @@ module Pod
         # This might be ok for some teams but it prevents others that are interested in using cocoapods-bazel to migrate to Bazel and eventually stop
         # depending on cocoapods. If the generated BUILD files don't contain "all" states and a 'pod install' is always required it's not trivial how to eventually treat the
         # BUILD files as source of truth.
-        :experimental_deps_debug_and_release
+        :experimental_deps_debug_and_release,
+
+        # Allows exlcuding certain pods with a given name from being generated as a Bazel target.
+        # This is useful for targets which are not compatible with Bazel or do not need to be built with Bazel.
+        # For example, some pods are simply binaries meant to be executed as part of a build phase.
+        # These pods do not cleanly map into a Bazel library target and can be excluded from the generated Bazel targets.
+        :experimental_exclude_pods,
+
+        # Allows adding a suffix to the name of all targets used as dependencies in the generated Bazel targets.
+        # Some macros may suffix a `*_library` target with something like `.lib` and a top-level `*_framework` target is used to represent the `name` instead.
+        # In this case `deps` should refer to the `*_library` target with the provided suffix.
+        # For example, if the suffix is `.lib` and the `name` is `Foo` then whenever `Foo` is used as a dependency in a `deps` attribute it will be suffixed with `.lib`.
+        :experimental_deps_suffix
       ].freeze
       private_constant :PLUGIN_KEY
       DEFAULTS = {
@@ -54,7 +66,9 @@ module Pod
         default_xcconfigs: {}.freeze,
         build_file_doc: '',
         features: {
-          experimental_deps_debug_and_release: false
+          experimental_deps_debug_and_release: false,
+          experimental_exclude_pods: [],
+          experimental_deps_suffix: ''
         }
       }.with_indifferent_access.freeze
 
@@ -110,6 +124,14 @@ module Pod
 
       def experimental_deps_debug_and_release
         to_h[:features][:experimental_deps_debug_and_release]
+      end
+
+      def experimental_exclude_pods
+        to_h[:features][:experimental_exclude_pods]
+      end
+
+      def experimental_deps_suffix
+        to_h[:features][:experimental_deps_suffix]
       end
 
       def build_file_doc

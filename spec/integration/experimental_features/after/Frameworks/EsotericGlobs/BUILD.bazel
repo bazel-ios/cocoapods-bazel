@@ -1,5 +1,8 @@
-load("@build_bazel_rules_ios//rules:app.bzl", "ios_application")
-load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
+load(
+    "//:rules.bzl",
+    "apple_framework",
+    "ios_application",
+)
 
 apple_framework(
     name = "EsotericGlobs",
@@ -25,5 +28,5 @@ ios_application(
     module_name = "EsotericGlobs_App",
     swift_version = "5.2",
     visibility = ["//visibility:public"],
-    deps = [":EsotericGlobs"],
+    deps = [":EsotericGlobs.lib"],
 )

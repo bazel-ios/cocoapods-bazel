@@ -32,7 +32,15 @@ module Pod
       attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
       private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
 
-      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false)
+      def initialize(
+        installer,
+        pod_target,
+        non_library_spec = nil,
+        default_xcconfigs = {},
+        experimental_deps_debug_and_release = false,
+        experimental_exclude_pods = [],
+        experimental_deps_suffix = ''
+      )
         @installer = installer
         @pod_target = pod_target
         @file_accessors = non_library_spec ? pod_target.file_accessors.select { |fa| fa.spec == non_library_spec } : pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
@@ -43,17 +51,25 @@ module Pod
         @default_xcconfigs = default_xcconfigs
         @resolved_xconfig_by_config = {}
         @experimental_deps_debug_and_release = experimental_deps_debug_and_release
+        @experimental_exclude_pods = experimental_exclude_pods
+        @experimental_deps_suffix = experimental_deps_suffix
         @relative_sandbox_root = installer.sandbox.root.relative_path_from(installer.config.installation_root).to_s
       end
 
-      def bazel_label(relative_to: nil)
+      def pod_target_name
+        @pod_target.name
+      end
+
+      def bazel_label(relative_to: nil, suffix: '')
         package_basename = File.basename(package)
         if package == relative_to
-          ":#{label}"
+          ":#{label}#{suffix}"
+        elsif package_basename == label && suffix
+          "//#{package}:#{label}#{suffix}"
         elsif package_basename == label
           "//#{package}"
         else
-          "//#{package}:#{label}"
+          "//#{package}:#{label}#{suffix}"
         end
       end
 
@@ -69,7 +85,15 @@ module Pod
         end
 
         app_spec, app_target = *app_host_info
-        Target.new(installer, app_target, app_spec, {}, @experimental_deps_debug_and_release)
+        Target.new(
+          installer,
+          app_target,
+          app_spec,
+          {},
+          @experimental_deps_debug_and_release,
+          @experimental_exclude_pods,
+          @experimental_deps_suffix
+        )
       end
 
       def type
@@ -462,10 +486,12 @@ module Pod
 
       def deps_by_config
         debug_targets = dependent_targets_by_config[:debug]
+                        .reject { |t| @experimental_exclude_pods.include?(t.pod_target_name) }
         release_targets = dependent_targets_by_config[:release]
+                          .reject { |t| @experimental_exclude_pods.include?(t.pod_target_name) }
 
-        debug_labels = debug_targets.map { |dt| dt.bazel_label(relative_to: package) }
-        release_labels = release_targets.map { |dt| dt.bazel_label(relative_to: package) }
+        debug_labels = debug_targets.map { |dt| dt.bazel_label(relative_to: package, suffix: @experimental_deps_suffix) }
+        release_labels = release_targets.map { |dt| dt.bazel_label(relative_to: package, suffix: @experimental_deps_suffix) }
         shared_labels = (debug_labels & release_labels).uniq
 
         debug_only_labels = debug_labels - shared_labels
@@ -597,7 +623,7 @@ module Pod
           infoplists_by_build_setting: pod_target_infoplists_by_build_setting,
           infoplists: common_pod_target_infoplists(additional_plist: nil_if_empty(non_library_spec.consumer(pod_target.platform).info_plist)),
           minimum_os_version: build_os_version || pod_target.deployment_target_for_non_library_spec(non_library_spec),
-          test_host: test_host&.bazel_label(relative_to: package) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
+          test_host: test_host&.bazel_label(relative_to: package, suffix: @experimental_deps_suffix) || file_accessors.any? { |fa| fa.spec_consumer.requires_app_host? } || nil
         }
       end
 

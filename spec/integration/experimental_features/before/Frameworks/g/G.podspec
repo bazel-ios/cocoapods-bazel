@@ -17,6 +17,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'OnlyPre', '= 1.0.0.pre.1'
   s.dependency 'Public'
+  s.dependency 'ExcludedPod'
 
   s.test_spec 'Tests' do |ts|
     ts.source_files = 'Tests/**/*.{m,swift}'
