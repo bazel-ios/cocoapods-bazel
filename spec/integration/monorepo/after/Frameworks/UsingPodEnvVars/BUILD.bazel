@@ -14,7 +14,6 @@ apple_framework(
         "Sources/**/*.m",
         "Sources/**/*.swift",
     ]),
-    infoplists = [{"CFBundleShortVersionString": "1.0.0"}],
     platforms = {"ios": "11.0"},
     private_headers = glob(["Sources/Internal/**/*.h"]),
     swift_version = "5.2",
@@ -71,13 +70,13 @@ ios_application(
         ],
         "VERSIONING_SYSTEM": "apple-generic",
         "SWIFT_OPTIMIZATION_LEVEL_Debug": "-Onone",
-        "SWIFT_OPTIMIZATION_LEVEL_Release": "-Owholemodule",
+        "SWIFT_OPTIMIZATION_LEVEL_Release": "-Osize",
         "TEST_PODS_ROOT_ENV_VAR": "/Testing/Env/Var",
         "TEST_PODS_TARGET_SRCROOT_ENV_VAR": "Testing/Env/Var",
     },
     xcconfig_by_build_setting = {
         "//Pods/cocoapods-bazel:debug": {"SWIFT_OPTIMIZATION_LEVEL": "-Onone"},
-        "//Pods/cocoapods-bazel:release": {"SWIFT_OPTIMIZATION_LEVEL": "-Owholemodule"},
+        "//Pods/cocoapods-bazel:release": {"SWIFT_OPTIMIZATION_LEVEL": "-Osize"},
     },
     deps = [":UsingPodEnvVars"],
 )

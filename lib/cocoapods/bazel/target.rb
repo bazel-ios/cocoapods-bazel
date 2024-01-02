@@ -690,7 +690,7 @@ module Pod
         pod_target.xcframeworks.values.flatten(1).uniq.map do |xcframework|
           {
             'name' => xcframework.name,
-            'slices' => xcframework.slices.map do |slice|
+            'slices' => xcframework.slices.sort_by(&:identifier).map do |slice|
               {
                 'identifier' => slice.identifier,
                 'platform' => rules_ios_platform_name(slice.platform),

@@ -9,6 +9,17 @@ apple_framework(
             "name": "OTPublishersHeadlessSDK",
             "slices": [
                 {
+                    "identifier": "ios-arm64",
+                    "platform": "ios",
+                    "platform_variant": "",
+                    "supported_archs": ["arm64"],
+                    "path": "OTPublishersHeadlessSDK.xcframework/ios-arm64/OTPublishersHeadlessSDK.framework",
+                    "build_type": {
+                        "linkage": "dynamic",
+                        "packaging": "framework",
+                    },
+                },
+                {
                     "identifier": "ios-arm64_x86_64-simulator",
                     "platform": "ios",
                     "platform_variant": "simulator",
@@ -17,17 +28,6 @@ apple_framework(
                         "x86_64",
                     ],
                     "path": "OTPublishersHeadlessSDK.xcframework/ios-arm64_x86_64-simulator/OTPublishersHeadlessSDK.framework",
-                    "build_type": {
-                        "linkage": "dynamic",
-                        "packaging": "framework",
-                    },
-                },
-                {
-                    "identifier": "ios-arm64",
-                    "platform": "ios",
-                    "platform_variant": "",
-                    "supported_archs": ["arm64"],
-                    "path": "OTPublishersHeadlessSDK.xcframework/ios-arm64/OTPublishersHeadlessSDK.framework",
                     "build_type": {
                         "linkage": "dynamic",
                         "packaging": "framework",

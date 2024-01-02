@@ -17,8 +17,8 @@ apple_framework(
         "//Pods/cocoapods-bazel:deps_debug": ["//Pods/OnlyPre"],
         "//Pods/cocoapods-bazel:deps_release": ["//Frameworks/d:D"],
         "//Pods/cocoapods-bazel:deps_debug_and_release": [
-            "//Pods/OnlyPre",
             "//Frameworks/d:D",
+            "//Pods/OnlyPre",
         ],
     }),
 )

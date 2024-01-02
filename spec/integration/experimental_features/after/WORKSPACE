@@ -1,14 +1,11 @@
 workspace(name = "cocoapods_bazel_test")
 
-load(
-    "@bazel_tools//tools/build_defs/repo:git.bzl",
-    "git_repository",
-)
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-git_repository(
+http_archive(
     name = "build_bazel_rules_ios",
-    branch = "master",
-    remote = "https://github.com/bazel-ios/rules_ios.git",
+    sha256 = "704077e1acb2a10301db628c3a40686810e776e453130acbce85d4882dc7f517",
+    url = "https://github.com/bazel-ios/rules_ios/releases/download/3.1.4/rules_ios.3.1.4.tar.gz",
 )
 
 load(

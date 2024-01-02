@@ -15,10 +15,6 @@ Pod::Spec.new do |s|
   s.source_files = 'Sources/**/*.{h,m,swift}'
   s.private_header_files = 'Sources/Internal/**/*.h'
 
-  s.info_plist = {
-    'CFBundleShortVersionString' => '1.0.0'
-  }
-
   s.test_spec 'Tests' do |ts|
     ts.source_files = 'Tests/**/*.{m,swift}'
   end
@@ -35,7 +31,7 @@ Pod::Spec.new do |s|
       'VERSIONING_SYSTEM' => 'apple-generic',
       'SWIFT_OPTIMIZATION_LEVEL' => "$(SWIFT_OPTIMIZATION_LEVEL_$(CONFIGURATION))",
       'SWIFT_OPTIMIZATION_LEVEL_Debug' => '-Onone',
-      'SWIFT_OPTIMIZATION_LEVEL_Release' => '-Owholemodule'
+      'SWIFT_OPTIMIZATION_LEVEL_Release' => '-Osize'
     }
   end
 end

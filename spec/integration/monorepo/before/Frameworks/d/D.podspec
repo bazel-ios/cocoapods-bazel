@@ -27,11 +27,6 @@ Pod::Spec.new do |s|
     ts.source_files = 'Tests/**/*.{m,swift}'
 
     ts.dependency 'E'
-
-    ts.info_plist = {
-      'COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY' => true,
-      'COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY_2' => 'KEY_2',
-    }
   end
 
   s.app_spec 'App' do |as|
@@ -42,11 +37,6 @@ Pod::Spec.new do |s|
       'SWIFT_PLATFORM_TARGET_PREFIX' => 'ios',
       'SWIFT_DEPLOYMENT_TARGET' => '9.0',
       'LLVM_TARGET_TRIPLE_OS_VERSION' => 'ios9.0'
-    }
-
-    as.info_plist = {
-      'COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY' => true,
-      'COCOAPODS_BAZEL_TEST_INFO_PLIST_KEY_2' => 'KEY_2',
     }
   end
 end

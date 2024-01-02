@@ -46,6 +46,7 @@ require 'pretty_bacon'
 
 spec_dir = Pathname(__dir__)
 
+require 'cocoapods'
 require 'cocoapods-core/lockfile'
 require 'cocoapods-core/yaml_helper'
 require 'xcodeproj'
