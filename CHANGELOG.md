@@ -1,3 +1,6 @@
+0.1.7
+* Adding `testonly` to targets that link with XCTest becomes an opt-in with config `enable_add_testonly`
+
 0.1.6
 * New xcframework_excluded_platforms option
 * Add .ruby-version file, update github action code
