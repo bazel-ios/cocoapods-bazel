@@ -44,7 +44,8 @@ module Pod
               pod_target,
               fa.spec,
               default_xcconfigs,
-              config.experimental_deps_debug_and_release
+              config.experimental_deps_debug_and_release,
+              config.xcframework_excluded_platforms
             )
           end
 
@@ -53,7 +54,8 @@ module Pod
             pod_target,
             nil,
             default_xcconfigs,
-            config.experimental_deps_debug_and_release
+            config.experimental_deps_debug_and_release,
+            config.xcframework_excluded_platforms
           )
 
           bazel_targets = [default_target] + targets_without_library_specification
