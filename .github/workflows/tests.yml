@@ -11,12 +11,10 @@ jobs:
     name: Build and Test
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
       - name: Print Xcode version
         run: sudo xcode-select -p
-      - uses: actions/setup-ruby@v1
-        with:
-          ruby-version: "2.x" # Version range or exact version of a Ruby version to use, using semvers version range syntax.
       - name: Install Gems
         run: bundle install
       - name: Build and Test

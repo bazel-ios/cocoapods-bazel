@@ -55,7 +55,8 @@ module Pod
         build_file_doc: '',
         features: {
           experimental_deps_debug_and_release: false
-        }
+        },
+        xcframework_excluded_platforms: [].freeze
       }.with_indifferent_access.freeze
 
       private_constant :DEFAULTS
@@ -114,6 +115,10 @@ module Pod
 
       def build_file_doc
         to_h[:build_file_doc]
+      end
+
+      def xcframework_excluded_platforms
+        to_h[:xcframework_excluded_platforms]
       end
     end
   end
