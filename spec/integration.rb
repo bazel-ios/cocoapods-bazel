@@ -48,6 +48,7 @@ spec_dir = Pathname(__dir__)
 
 require 'cocoapods-core/lockfile'
 require 'cocoapods-core/yaml_helper'
+require 'date'
 require 'xcodeproj'
 
 require_relative 'spec_helper/prepare_spec_repos'

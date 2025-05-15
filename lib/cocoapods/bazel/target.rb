@@ -30,7 +30,10 @@ module Pod
       include XCConfigResolver
 
       attr_reader :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
+
+      # rubocop:disable Style/AccessModifierDeclarations
       private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
+      # rubocop:enable Style/AccessModifierDeclarations
 
       def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false, xcframework_excluded_platforms = [])
         @installer = installer
@@ -43,6 +46,7 @@ module Pod
         @default_xcconfigs = default_xcconfigs
         @resolved_xconfig_by_config = {}
         @experimental_deps_debug_and_release = experimental_deps_debug_and_release
+        @xcframework_excluded_platforms = xcframework_excluded_platforms
         @relative_sandbox_root = installer.sandbox.root.relative_path_from(installer.config.installation_root).to_s
       end
 
