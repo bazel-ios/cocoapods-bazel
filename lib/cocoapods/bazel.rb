@@ -20,6 +20,9 @@ module Pod
         workspace = installer.config.installation_root
         sandbox = installer.sandbox
 
+        # Delete previously created symlinks for Development Pods
+        system("find #{workspace}/Pods -maxdepth 1 -type l -delete", exception: true)
+
         # Ensure we declare the sandbox (Pods/) as a package so each Pod (as a package) belongs to sandbox root package instead
         FileUtils.touch(File.join(installer.config.sandbox_root, 'BUILD.bazel'))
 
@@ -27,13 +30,11 @@ module Pod
         installer.pod_targets.each do |pod_target|
           package = sandbox.pod_dir(pod_target.pod_name).relative_path_from(workspace).to_s
           if package.start_with?('..')
-            raise Informative, <<~MSG
-              Bazel does not support Pod located outside of current workspace: \"#{package}\".
-              To fix this, you can move the Pod into workspace,
-              or you can symlink the Pod inside the workspace by running `ln -s <path_to_pod> .` at workspace root
-              Then change path declared in Podfile to `./<pod_name>`
-              Current workspace: #{workspace}
-            MSG
+            ## Symlink Development Pods into the workspace to build with Bazel.
+            UI.warn"Created symlink for Development Pod - #{pod_target.pod_name} to support building with Bazel"
+
+            system("ln -s #{workspace}/#{package} #{workspace}/Pods", exception: true)
+            File.rename "#{workspace}/Pods/#{File.basename(package)}", "#{workspace}/Pods/#{pod_target.pod_name}"
           end
 
           build_file = build_files[package]
