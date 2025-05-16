@@ -35,7 +35,8 @@ module Pod
       private :installer, :pod_target, :file_accessors, :non_library_spec, :label, :package, :default_xcconfigs, :resolved_xconfig_by_config, :relative_sandbox_root
       # rubocop:enable Style/AccessModifierDeclarations
 
-      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false, xcframework_excluded_platforms = [], enable_add_testonly = false)
+      def initialize(installer, pod_target, non_library_spec = nil, default_xcconfigs = {}, experimental_deps_debug_and_release = false,
+                     xcframework_excluded_platforms = [], enable_add_testonly = false)
         @installer = installer
         @pod_target = pod_target
         @file_accessors = non_library_spec ? pod_target.file_accessors.select { |fa| fa.spec == non_library_spec } : pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
@@ -379,10 +380,10 @@ module Pod
         kwargs[:runtime_deps] = []
         kwargs[:sdk_dylibs] = file_accessors.flat_map { |fa| fa.spec_consumer.libraries }.sort.uniq
         kwargs[:sdk_frameworks] = file_accessors.flat_map { |fa| fa.spec_consumer.frameworks }.sort.uniq
-        kwargs[:testonly] = true if (kwargs[:sdk_frameworks].include? 'XCTest' && @enable_add_testonly)
+        kwargs[:testonly] = true if (kwargs[:sdk_frameworks].include? 'XCTest') && @enable_add_testonly
         kwargs[:sdk_includes] = []
         kwargs[:weak_sdk_frameworks] = file_accessors.flat_map { |fa| fa.spec_consumer.weak_frameworks }.sort.uniq
-        kwargs[:testonly] = true if (kwargs[:weak_sdk_frameworks].include? 'XCTest' && @enable_add_testonly)
+        kwargs[:testonly] = true if (kwargs[:weak_sdk_frameworks].include? 'XCTest') && @enable_add_testonly
 
         kwargs[:vendored_static_frameworks] = glob(attr: :vendored_static_frameworks, return_files: true)
         kwargs[:vendored_dynamic_frameworks] = glob(attr: :vendored_dynamic_frameworks, return_files: true)
