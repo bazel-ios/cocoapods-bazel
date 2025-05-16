@@ -1,4 +1,4 @@
-0.1.7
+0.1.7.1
 * Adding `testonly` to targets that link with XCTest becomes an opt-in with config `enable_add_testonly`
 
 0.1.6
