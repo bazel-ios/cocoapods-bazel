@@ -56,7 +56,8 @@ module Pod
         features: {
           experimental_deps_debug_and_release: false
         },
-        xcframework_excluded_platforms: [].freeze
+        xcframework_excluded_platforms: [].freeze,
+        enable_add_testonly: false
       }.with_indifferent_access.freeze
 
       private_constant :DEFAULTS
@@ -119,6 +120,10 @@ module Pod
 
       def xcframework_excluded_platforms
         to_h[:xcframework_excluded_platforms]
+      end
+
+      def enable_add_testonly
+        to_h[:enable_add_testonly]
       end
     end
   end
