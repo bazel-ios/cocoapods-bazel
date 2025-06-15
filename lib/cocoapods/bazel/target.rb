@@ -336,10 +336,10 @@ module Pod
             end
             return [] if h.empty?
 
-            h.map do |excludes, globs|
-              excludes = excludes.empty? ? {} : { exclude: excludes.flat_map(&method(:expand_glob)) }
-              starlark { function_call(:glob, globs.uniq, **excludes) }
-            end.reduce(&:+)
+            globs = h.values.reduce(:+).uniq
+            excludes = h.keys.reduce(:+).uniq
+            excludes = excludes.empty? ? {} : { exclude: excludes.flat_map(&method(:expand_glob)) }
+            starlark { function_call(:glob, globs, **excludes) }
           end
 
           kwargs[:srcs] = m[srcs]

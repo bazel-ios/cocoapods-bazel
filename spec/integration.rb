@@ -72,6 +72,7 @@ CLIntegracon.configure do |c|
   c.temp_path = c.spec_path + 'tmp'
 
   c.ignores BuildFileMatcher.new('_unused')
+  c.include_hidden_files = false
 
   c.hook_into :bacon
 end
